@@ -37,6 +37,10 @@ namespace studio
 		math::Vertex m_target;
 
 	public:
+		Camera(const math::Vertex& position, const math::Vertex& target)
+			: m_position(position)
+			, m_target(target)
+		{}
 		void renderTo(const Camera* cam, const math::Matrix& parent) const override {}
 		math::Vector normal() const { return m_target - m_position; }
 		void transform(math::Vertex& pt, const math::Matrix& local) const;

@@ -158,8 +158,9 @@ namespace studio
 		public:
 			Vertex()
 			{
-				for (size_t i = 0; i < my_height; ++i)
-					m_data[i] = i == my_height - 1 ? 1 : 0;
+				for (size_t i = 0; i < my_height - 1; ++i)
+					m_data[i] = 0;
+				m_data[my_height - 1] = 1;
 			}
 			Vertex(long double x, long double y, long double z)
 			{

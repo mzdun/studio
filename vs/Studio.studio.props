@@ -11,7 +11,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)..\libstudio\includes</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(SolutionDir)..\bin\$(PlatformName)\$(Configuration)\listudio.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)..\bin\$(PlatformName)\$(Configuration)\libstudio.lib</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalLibraryDirectories>
