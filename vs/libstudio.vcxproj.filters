@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="libstudio">
+      <UniqueIdentifier>{dcb0de70-adb9-11e2-9d9f-90e6ba352a52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libstudio\includes">
+      <UniqueIdentifier>{7daa0295-1c99-402c-9d0e-98f26de82830}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libstudio\src">
+      <UniqueIdentifier>{4d1494d5-ccad-439e-b91c-c32ea4468024}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\libstudio\pch.cpp">
+      <Filter>libstudio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libstudio\src\fundamentals.cpp">
+      <Filter>libstudio\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libstudio\src\camera.cpp">
+      <Filter>libstudio\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libstudio\src\triangle.cpp">
+      <Filter>libstudio\src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\libstudio\pch.h">
+      <Filter>libstudio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libstudio\includes\fundamentals.hpp">
+      <Filter>libstudio\includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libstudio\includes\renderable.hpp">
+      <Filter>libstudio\includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libstudio\includes\container.hpp">
+      <Filter>libstudio\includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libstudio\includes\camera.hpp">
+      <Filter>libstudio\includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libstudio\includes\triangle.hpp">
+      <Filter>libstudio\includes</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
