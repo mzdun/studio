@@ -117,7 +117,7 @@ namespace studio
 			{
 				// identity
 				for (size_t i = 0; i < sizeof(m_data) / sizeof(m_data[0]); ++i)
-					m_data[i] = i % 15 ? 0 : 1;
+					m_data[i] = i % 5 ? 0 : 1;
 			}
 
 			MATRIX_OPS(Matrix)
