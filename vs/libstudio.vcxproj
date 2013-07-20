@@ -67,11 +67,13 @@
     <ClCompile Include="..\libstudio\pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\libstudio\src\block.cpp" />
     <ClCompile Include="..\libstudio\src\camera.cpp" />
     <ClCompile Include="..\libstudio\src\fundamentals.cpp" />
     <ClCompile Include="..\libstudio\src\triangle.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\libstudio\includes\block.hpp" />
     <ClInclude Include="..\libstudio\includes\camera.hpp" />
     <ClInclude Include="..\libstudio\includes\container.hpp" />
     <ClInclude Include="..\libstudio\includes\shared_vector.hpp" />

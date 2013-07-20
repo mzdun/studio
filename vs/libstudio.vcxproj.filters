@@ -24,6 +24,9 @@
     <ClCompile Include="..\libstudio\src\triangle.cpp">
       <Filter>libstudio\src</Filter>
     </ClCompile>
+    <ClCompile Include="..\libstudio\src\block.cpp">
+      <Filter>libstudio\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\libstudio\pch.h">
@@ -48,6 +51,9 @@
       <Filter>libstudio\includes</Filter>
     </ClInclude>
     <ClInclude Include="..\libstudio\includes\shared_vector.hpp">
+      <Filter>libstudio\includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libstudio\includes\block.hpp">
       <Filter>libstudio\includes</Filter>
     </ClInclude>
   </ItemGroup>
