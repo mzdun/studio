@@ -22,26 +22,40 @@
 * SOFTWARE.
 */
 
-#ifndef __LIBSTUDIO_CONTAINER_HPP__
-#define __LIBSTUDIO_CONTAINER_HPP__
+#ifndef __LIBSTUDIO_SCENE_HPP__
+#define __LIBSTUDIO_SCENE_HPP__
 
-#include "renderable.hpp"
-#include <memory>
-#include <vector>
+#include "container.hpp"
+#include "camera.hpp"
 
 namespace studio
 {
-	class Container : public Renderable
+	class Scene : public Container
 	{
-	protected:
-		typedef std::vector<std::shared_ptr<Renderable>> Renderables;
-		Renderables m_children;
+		typedef std::vector<std::shared_ptr<Camera>> Cameras;
+		Cameras m_cameras;
+		template <typename T1, typename T2>
+		struct is_
+		{
+			static T1 marker();
+			static char test(const T2&);
+			static char (&test(...))[2];
+			enum { exists = (sizeof(test(marker())) == sizeof(char) ) };
+		};
+		template <typename T>
+		bool is_camera()
+		{
+			return is_<T, Camera>::exists;
+		}
 	public:
 		template <typename T, typename... Args>
 		std::shared_ptr<T> emplace_back(Args && ... args)
 		{
+			if (!is_camera<T>())
+				return Container::emplace_back<T>(std::forward<Args>(args)...);
+
 			auto tmp = std::make_shared<T>(std::forward<Args>(args)...);
-			auto child = std::static_pointer_cast<Renderable>(tmp);
+			auto child = std::static_pointer_cast<Camera>(tmp);
 
 			auto size = m_children.size();
 			m_children.push_back(child);
@@ -51,13 +65,17 @@ namespace studio
 			return tmp;
 		}
 
-		void renderTo(const Camera* cam, const math::Matrix& parent) const override
+		void renderAllCameras() const
 		{
-			math::Matrix accumulated = parent * localMatrix();
-			for (auto && child : m_children)
-				child->renderTo(cam, accumulated);
+			for (auto && cam : m_cameras)
+				renderTo(cam.get());
+		}
+
+		void renderTo(const Camera* cam) const
+		{
+			Container::renderTo(cam, math::Matrix::identity());
 		}
 	};
 }
 
-#endif //__LIBSTUDIO_CONTAINER_HPP__
+#endif //__LIBSTUDIO_SCENE_HPP__

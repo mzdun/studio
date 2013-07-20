@@ -44,5 +44,8 @@
     <ClInclude Include="..\libstudio\includes\triangle.hpp">
       <Filter>libstudio\includes</Filter>
     </ClInclude>
+    <ClInclude Include="..\libstudio\includes\scene.hpp">
+      <Filter>libstudio\includes</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
