@@ -37,7 +37,7 @@ namespace studio
 		Renderables m_children;
 	public:
 		template <typename T, typename... Args>
-		std::shared_ptr<T> emplace_back(Args && ... args)
+		std::shared_ptr<T> add(Args && ... args)
 		{
 			return m_children.emplace_back<T>(std::forward<Args>(args)...);
 		}

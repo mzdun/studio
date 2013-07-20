@@ -54,7 +54,7 @@ namespace studio
 
 	public:
 		template <typename T, typename... Args>
-		std::shared_ptr<T> emplace_back(Args && ... args)
+		std::shared_ptr<T> add(Args && ... args)
 		{
 			return _if< is_<T, Camera>::val >::get(*this).emplace_back<T>(std::forward<Args>(args)...);
 		}
