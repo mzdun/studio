@@ -11,3 +11,35 @@
 *.lai
 *.la
 *.a
+
+
+*.xcf
+*.user
+*.sdf
+*.suo
+*.obj
+*.pdb
+*.orig
+*.opensdf
+Debug
+debug
+Release
+release
+PGO Release
+pgo release
+x64
+tmp
+int
+obj
+.DS_Store
+.deps
+
+*.pyc
+build
+ipch
+output
+bin
+*.lng
+*.pot
+*.mo
+Thumbs.db
