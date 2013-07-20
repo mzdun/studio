@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright (C) 2013 Marcin Zdun
 *
 * Permission is hereby granted, free of charge, to any person
@@ -22,33 +22,31 @@
 * SOFTWARE.
 */
 
-#ifndef __LIBSTUDIO_CONTAINER_HPP__
-#define __LIBSTUDIO_CONTAINER_HPP__
+#ifndef __SHARED_VECTOR_HPP__
+#define __SHARED_VECTOR_HPP__
 
-#include "renderable.hpp"
-#include "shared_vector.hpp"
+#include <memory>
+#include <vector>
 
-namespace studio
+namespace std
 {
-	class Container : public Renderable
+	template <typename Child>
+	class shared_vector: public std::vector<std::shared_ptr<Child>>
 	{
-	protected:
-		typedef std::shared_vector<Renderable> Renderables;
-		Renderables m_children;
 	public:
 		template <typename T, typename... Args>
 		std::shared_ptr<T> emplace_back(Args && ... args)
 		{
-			return m_children.emplace_back<T>(std::forward<Args>(args)...);
-		}
+			auto child = std::make_shared<T>(std::forward<Args>(args)...);
 
-		void renderTo(const Camera* cam, const math::Matrix& parent) const override
-		{
-			math::Matrix accumulated = parent * localMatrix();
-			for (auto && child : m_children)
-				child->renderTo(cam, accumulated);
+			auto _size = size();
+			push_back(child);
+			if (_size == size())
+				return nullptr;
+
+			return child;
 		}
 	};
 }
 
-#endif //__LIBSTUDIO_CONTAINER_HPP__
+#endif //__SHARED_VECTOR_HPP__

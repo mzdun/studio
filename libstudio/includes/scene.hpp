@@ -32,37 +32,31 @@ namespace studio
 {
 	class Scene : public Container
 	{
-		typedef std::vector<std::shared_ptr<Camera>> Cameras;
+		typedef std::shared_vector<Camera> Cameras;
 		Cameras m_cameras;
+
 		template <typename T1, typename T2>
 		struct is_
 		{
 			static T1 marker();
 			static char test(const T2&);
 			static char (&test(...))[2];
-			enum { exists = (sizeof(test(marker())) == sizeof(char) ) };
+			enum { val = (sizeof(test(marker())) == sizeof(char) ) };
 		};
-		template <typename T>
-		bool is_camera()
-		{
-			return is_<T, Camera>::exists;
-		}
+
+		template <bool is_camera>
+		struct _if;
+		template <>
+		struct _if<true> { static inline Cameras& get(Scene& ref) { return ref.m_cameras; } };
+
+		template <>
+		struct _if<false> { static inline Renderables& get(Scene& ref) { return ref.m_children; } };
+
 	public:
 		template <typename T, typename... Args>
 		std::shared_ptr<T> emplace_back(Args && ... args)
 		{
-			if (!is_camera<T>())
-				return Container::emplace_back<T>(std::forward<Args>(args)...);
-
-			auto tmp = std::make_shared<T>(std::forward<Args>(args)...);
-			auto child = std::static_pointer_cast<Camera>(tmp);
-
-			auto size = m_children.size();
-			m_children.push_back(child);
-			if (size == m_children.size())
-				return nullptr;
-
-			return tmp;
+			return _if< is_<T, Camera>::val >::get(*this).emplace_back<T>(std::forward<Args>(args)...);
 		}
 
 		void renderAllCameras() const

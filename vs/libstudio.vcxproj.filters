@@ -47,5 +47,8 @@
     <ClInclude Include="..\libstudio\includes\scene.hpp">
       <Filter>libstudio\includes</Filter>
     </ClInclude>
+    <ClInclude Include="..\libstudio\includes\shared_vector.hpp">
+      <Filter>libstudio\includes</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
