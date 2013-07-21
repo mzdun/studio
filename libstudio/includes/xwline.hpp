@@ -25,6 +25,8 @@
 #ifndef __LIBSTUDIO_XWLINE_HPP__
 #define __LIBSTUDIO_XWLINE_HPP__
 
+#include "fundamentals.hpp"
+
 namespace studio
 {
 	// based on a version from http://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm

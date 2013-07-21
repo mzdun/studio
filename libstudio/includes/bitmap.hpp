@@ -207,13 +207,27 @@ namespace studio
 			make_xwdrawer(*this).draw(tr(start), tr(stop), startDepth, stopDepth);
 		}
 
+		bool isAbove(int x, int y, long double depth)
+		{
+			long double * ptr = m_depth + y * m_width + x;
+			if (*ptr > depth)
+			{
+				*ptr = depth;
+				return true;
+			}
+			return false;
+		}
+		void blend(int x, int y, long double depth, long double brightness)
+		{
+			if (isAbove(x, y, depth))
+				PlatformBitmap<BitmapType::G8>::blend(x, y, depth, brightness);
+		}
+
 		void text(const math::Point& pos, const wchar_t* _text, long double depth) override
 		{
 		}
 
-		void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) override
-		{
-		}
+		void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) override;
 
 		inline math::Point tr(const math::Point& pt)
 		{
