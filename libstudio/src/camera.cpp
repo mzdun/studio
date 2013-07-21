@@ -49,4 +49,12 @@ namespace studio
 		}
 		transformPoints(vertices, local);
 	}
+
+	void Camera::renderLine(const math::Vertex& start, const math::Vertex& stop) const
+	{
+		math::Vertex vertices [2] = {start, stop};
+		transformPoints(vertices, math::Matrix::identity());
+		math::Point points[sizeof(vertices) / sizeof(vertices[0])];
+		project(points, vertices);
+	}
 }

@@ -33,18 +33,27 @@ namespace studio
 
 	class Camera : public Renderable
 	{
+		long double m_eye;
 		math::Vertex m_position;
 		math::Vertex m_target;
 
 	public:
-		Camera(const math::Vertex& position, const math::Vertex& target)
-			: m_position(position)
+		Camera(long double eye, const math::Vertex& position, const math::Vertex& target)
+			: m_eye(eye)
+			, m_position(position)
 			, m_target(target)
 		{}
 		void renderTo(const Camera* cam, const math::Matrix& parent) const override {}
 		math::Vector normal() const { return m_target - m_position; }
 		void transform(math::Vertex& pt, const math::Matrix& local) const;
-
+		long double project(long double z, long double other) const
+		{
+			return other * m_eye / (m_eye + z);
+		}
+		math::Point project(const math::Vertex& pt) const
+		{
+			return { project(pt.z(), pt.x()), project(pt.z(), pt.y()) };
+		}
 
 		template <size_t len>
 		void transformPoints(math::Vertex(&points)[len], const math::Matrix& local) const
@@ -53,7 +62,19 @@ namespace studio
 				transform(pt, local);
 		}
 
-		void render(const Triangle*, const math::Matrix&) const;
+		template <size_t len>
+		void project(math::Point (&out)[len], math::Vertex (&points)[len]) const
+		{
+			auto* dest = out;
+			for (auto && src : points)
+				*dest++ = project(src);
+		}
+
+		virtual void render(const Triangle*, const math::Matrix&) const;
+		virtual void renderLine(const math::Vertex& start, const math::Vertex& stop) const;
+
+		math::Vertex position() const { return m_position; }
+		math::Vertex target() const { return m_target; }
 	};
 }
 
