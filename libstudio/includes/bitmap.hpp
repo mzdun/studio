@@ -158,12 +158,12 @@ namespace studio
 			erase();
 		}
 
-		void line(const math::Point& start, const math::Point& stop) override
+		void line(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth) override
 		{
 			make_xwdrawer(*this).draw(tr(start), tr(stop));
 		}
 
-		void text(const math::Point& pos, const wchar_t* _text) override
+		void text(const math::Point& pos, const wchar_t* _text, long double depth) override
 		{
 		}
 
@@ -181,12 +181,12 @@ namespace studio
 			erase();
 		}
 
-		void line(const math::Point& start, const math::Point& stop) override
+		void line(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth) override
 		{
 			make_xwdrawer(*this).draw(tr(start), tr(stop));
 		}
 
-		void text(const math::Point& pos, const wchar_t* _text) override
+		void text(const math::Point& pos, const wchar_t* _text, long double depth) override
 		{
 		}
 

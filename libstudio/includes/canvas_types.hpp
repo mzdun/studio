@@ -30,32 +30,45 @@
 
 namespace studio
 {
-	class SimpleCanvas : public GrayscaleBitmap
+	template <typename BasicBitmap = GrayscaleBitmap>
+	class SimpleCanvas : public BasicBitmap
 	{
 	public:
-		SimpleCanvas(int w, int h) : GrayscaleBitmap(w, h) {}
+		SimpleCanvas(int w, int h) : BasicBitmap(w, h) {}
 	};
 
-	class CyanMagentaCanvas : public StereoCanvas, public ColorBitmap
+	template <typename BasicBitmap>
+	class StereoCanvasImpl : public StereoCanvas
 	{
-		GrayscaleBitmap m_leftEye;
-		GrayscaleBitmap m_rightEye;
+	protected:
+		BasicBitmap m_leftEye;
+		BasicBitmap m_rightEye;
 	public:
-		CyanMagentaCanvas(int w, int h)
-			: ColorBitmap(w, h)
-			, m_leftEye(w, h)
+		StereoCanvasImpl(int w, int h)
+			: m_leftEye(w, h)
 			, m_rightEye(w, h)
 		{
 		}
 
-		void line(const math::Point& start, const math::Point& stop, bool leftEye) override
+		void line(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth, bool leftEye) override
 		{
-			(leftEye ? m_leftEye : m_rightEye).line(start, stop);
+			(leftEye ? m_leftEye : m_rightEye).line(start, stop, startDepth, stopDepth);
 		}
 
-		void text(const math::Point& pos, const wchar_t* _text, bool leftEye) override
+		void text(const math::Point& pos, const wchar_t* _text, long double depth, bool leftEye) override
 		{
-			(leftEye ? m_leftEye : m_rightEye).text(pos, _text);
+			(leftEye ? m_leftEye : m_rightEye).text(pos, _text, depth);
+		}
+	};
+
+	template <typename BasicBitmap = GrayscaleBitmap>
+	class CyanMagentaCanvas : public StereoCanvasImpl<BasicBitmap>, public ColorBitmap
+	{
+	public:
+		CyanMagentaCanvas(int w, int h)
+			: StereoCanvasImpl<BasicBitmap>(w, h)
+			, ColorBitmap(w, h)
+		{
 		}
 
 		void save(const char* path)
@@ -107,26 +120,14 @@ namespace studio
 		}
 	};
 
-	class SideBySideCanvas : public StereoCanvas, public GrayscaleBitmap
+	template <typename BasicBitmap = GrayscaleBitmap>
+	class SideBySideCanvas : public StereoCanvasImpl<BasicBitmap>, public GrayscaleBitmap
 	{
-		GrayscaleBitmap m_leftEye;
-		GrayscaleBitmap m_rightEye;
 	public:
 		SideBySideCanvas(int w, int h)
-			: GrayscaleBitmap(w * 2, h)
-			, m_leftEye(w, h)
-			, m_rightEye(w, h)
+			: StereoCanvasImpl<BasicBitmap>(w, h)
+			, GrayscaleBitmap(w * 2, h)
 		{
-		}
-
-		void line(const math::Point& start, const math::Point& stop, bool leftEye) override
-		{
-			(leftEye ? m_leftEye : m_rightEye).line(start, stop);
-		}
-
-		void text(const math::Point& pos, const wchar_t* _text, bool leftEye) override
-		{
-			(leftEye ? m_leftEye : m_rightEye).text(pos, _text);
 		}
 
 		void srcCopy(int x, int y, const GrayscaleBitmap& eye)

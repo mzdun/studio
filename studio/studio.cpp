@@ -42,9 +42,9 @@
 #define STEREO_CANVAS
 
 #if 1
-typedef studio::CyanMagentaCanvas StereoCanvasType;
+typedef studio::CyanMagentaCanvas<> StereoCanvasType;
 #else
-typedef studio::SideBySideCanvas StereoCanvasType;
+typedef studio::SideBySideCanvas<> StereoCanvasType;
 #endif
 
 struct Command {

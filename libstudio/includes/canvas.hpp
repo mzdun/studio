@@ -33,15 +33,15 @@ namespace studio
 	{
 	public:
 		virtual ~Canvas(){}
-		virtual void line(const math::Point& start, const math::Point& stop) = 0;
-		virtual void text(const math::Point& pos, const wchar_t* _text) = 0;
+		virtual void line(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth) = 0;
+		virtual void text(const math::Point& pos, const wchar_t* _text, long double depth) = 0;
 	};
 
 	struct StereoCanvas
 	{
 		virtual ~StereoCanvas() {}
-		virtual void line(const math::Point& start, const math::Point& stop, bool leftEye) = 0;
-		virtual void text(const math::Point& pos, const wchar_t* _text, bool leftEye) = 0;
+		virtual void line(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth, bool leftEye) = 0;
+		virtual void text(const math::Point& pos, const wchar_t* _text, long double depth, bool leftEye) = 0;
 	};
 
 	class SingleEyeCanvas : public Canvas
@@ -55,14 +55,14 @@ namespace studio
 		{
 		}
 
-		void line(const math::Point& start, const math::Point& stop) override
+		void line(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth) override
 		{
-			m_ref->line(start, stop, m_leftEye);
+			m_ref->line(start, stop, startDepth, stopDepth, m_leftEye);
 		}
 
-		void text(const math::Point& pos, const wchar_t* _text) override
+		void text(const math::Point& pos, const wchar_t* _text, long double depth) override
 		{
-			m_ref->text(pos, _text, m_leftEye);
+			m_ref->text(pos, _text, depth, m_leftEye);
 		}
 	};
 

@@ -87,8 +87,8 @@ namespace studio
 
 		if (m_canvas)
 		{
-			m_canvas->line(points[0], points[1]);
-			m_canvas->line(points[1], points[2]);
+			m_canvas->line(points[0], points[1], vertices[0].z(), vertices[1].z());
+			m_canvas->line(points[1], points[2], vertices[1].z(), vertices[2].z());
 		}
 	}
 
@@ -99,6 +99,6 @@ namespace studio
 		math::Point points[sizeof(vertices) / sizeof(vertices[0])];
 		project(points, vertices);
 		if (m_canvas)
-			m_canvas->line(points[0], points[1]);
+			m_canvas->line(points[0], points[1], vertices[0].z(), vertices[1].z());
 	}
 }
