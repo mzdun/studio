@@ -27,6 +27,9 @@
     <ClCompile Include="..\libstudio\src\block.cpp">
       <Filter>libstudio\src</Filter>
     </ClCompile>
+    <ClCompile Include="..\libstudio\src\win32_api.cpp">
+      <Filter>libstudio\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\libstudio\pch.h">
@@ -57,6 +60,9 @@
       <Filter>libstudio\includes</Filter>
     </ClInclude>
     <ClInclude Include="..\libstudio\includes\canvas.hpp">
+      <Filter>libstudio\includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libstudio\includes\platform_api.hpp">
       <Filter>libstudio\includes</Filter>
     </ClInclude>
   </ItemGroup>
