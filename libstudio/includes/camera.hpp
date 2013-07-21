@@ -26,6 +26,8 @@
 #define __LIBSTUDIO_CAMERA_HPP__
 
 #include "renderable.hpp"
+#include "canvas.hpp"
+#include <memory>
 
 namespace studio
 {
@@ -36,6 +38,7 @@ namespace studio
 		long double m_eye;
 		math::Vertex m_position;
 		math::Vertex m_target;
+		std::shared_ptr<Canvas> m_canvas;
 
 	public:
 		Camera(long double eye, const math::Vertex& position, const math::Vertex& target)
@@ -43,6 +46,14 @@ namespace studio
 			, m_position(position)
 			, m_target(target)
 		{}
+		template <typename T, typename... Args>
+		std::shared_ptr<T> create_canvas(Args&& ... args)
+		{
+			auto tmp = std::make_shared<T>(std::forward<Args>(args)...);
+			m_canvas = tmp;
+			return tmp;
+		}
+
 		void renderTo(const Camera* cam, const math::Matrix& parent) const override {}
 		math::Vector normal() const { return m_target - m_position; }
 		void transform(math::Vertex& pt, const math::Matrix& local) const;

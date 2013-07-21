@@ -25,6 +25,8 @@
 #include "pch.h"
 #include "camera.hpp"
 #include "triangle.hpp"
+#include <stdlib.h>
+#include <memory.h>
 
 namespace studio
 {
@@ -39,6 +41,13 @@ namespace studio
 		//TODO: apply pitch and yaw as resulting from m_target
 	}
 
+	static int round(long double ld)
+	{
+		if (ld < 0)
+			return (int) (ld - 0.5);
+		return (int) (ld + 0.5);
+	}
+
 	void Camera::render(const Triangle* triangle, const math::Matrix& local) const
 	{
 		Triangle::vertices_t vertices;
@@ -48,6 +57,38 @@ namespace studio
 				*pt++ = vertex;
 		}
 		transformPoints(vertices, local);
+
+#if 0
+		auto cosTh = math::Vector::cosTheta(
+			Triangle(vertices[0], vertices[1], vertices[2]).normal(),
+			vertices[1] - m_position
+			);
+		{
+			auto normal = Triangle(vertices[0], vertices[1], vertices[2]).normal();
+
+			wchar_t buffer[300];
+			swprintf_s(buffer, L"<%d, %d, %d>", round(normal.i()), round(normal.j()), round(normal.k()));
+
+			auto midpoint = ((vertices[0] + vertices[2]) / 2);// +vertices[1]) / 2;
+			auto textPos = midpoint + normal / (normal.length() / 400);
+			m_canvas->line(project(midpoint), project(midpoint + normal / (normal.length() / 150)));
+
+			//m_canvas->text(project(textPos), buffer);
+			normal = vertices[1] - m_position;
+			m_canvas->line(project(midpoint), { 0, 0 });
+		}
+#endif
+
+		math::Point points [sizeof(vertices)/sizeof(vertices[0])];
+		project(points, vertices);
+
+		std::cout << ".";
+
+		if (m_canvas)
+		{
+			m_canvas->line(points[0], points[1]);
+			m_canvas->line(points[1], points[2]);
+		}
 	}
 
 	void Camera::renderLine(const math::Vertex& start, const math::Vertex& stop) const
@@ -56,5 +97,7 @@ namespace studio
 		transformPoints(vertices, math::Matrix::identity());
 		math::Point points[sizeof(vertices) / sizeof(vertices[0])];
 		project(points, vertices);
+		if (m_canvas)
+			m_canvas->line(points[0], points[1]);
 	}
 }
