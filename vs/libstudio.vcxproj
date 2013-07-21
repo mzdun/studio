@@ -74,6 +74,7 @@
     <ClCompile Include="..\libstudio\src\win32_api.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\libstudio\includes\bitmap.hpp" />
     <ClInclude Include="..\libstudio\includes\block.hpp" />
     <ClInclude Include="..\libstudio\includes\camera.hpp" />
     <ClInclude Include="..\libstudio\includes\canvas.hpp" />

@@ -68,5 +68,8 @@
     <ClInclude Include="..\libstudio\includes\xwline.hpp">
       <Filter>libstudio\includes</Filter>
     </ClInclude>
+    <ClInclude Include="..\libstudio\includes\bitmap.hpp">
+      <Filter>libstudio\includes</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
