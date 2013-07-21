@@ -39,8 +39,8 @@
 #include <future>
 #include <iomanip>
 
-#define DEPTH_BUFFER
-//#define STEREO_CAMERA
+//#define DEPTH_BUFFER
+#define STEREO_CAMERA
 #define CYAN_MAGENTA
 
 namespace studio
@@ -180,7 +180,7 @@ int test(int argc, char* argv [])
 
 	scene->renderAllCameras();
 	canvas->save("test.png");
-#ifdef DEPTH_BUFFER
+#if defined(DEPTH_BUFFER) && !defined(STEREO_CAMERA)
 	canvas->saveDepths("depths.png");
 #endif
 
