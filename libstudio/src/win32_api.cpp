@@ -84,7 +84,7 @@ namespace studio
 			info.hdr.biSize = sizeof(BITMAPINFOHEADER);
 			info.hdr.biWidth = w;
 			info.hdr.biHeight = h;
-			info.hdr.biBitCount = 24;
+			info.hdr.biBitCount = 8;
 			info.hdr.biPlanes = 1;
 			info.hdr.biCompression = 0;
 			info.hdr.biSizeImage = w * h;

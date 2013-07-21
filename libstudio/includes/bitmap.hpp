@@ -146,6 +146,7 @@ namespace studio
 
 		void save(const char* path)
 		{
+			m_bmpAPI->save(path);
 		}
 	};
 
