@@ -34,9 +34,9 @@ namespace studio
 		Bitmap& ref;
 		XWDrawer(Bitmap& ref) : ref(ref) {}
 
-		inline void plot(long double x, long double y, long double brighteness)
+		inline void plot(long double x, long double y, long double depth, long double brighteness)
 		{
-			ref.blend((int) x, (int) y, brighteness);
+			ref.blend((int) x, (int) y, depth, brighteness);
 		}
 
 		// math helpers
@@ -47,7 +47,7 @@ namespace studio
 		static inline long double abs(long double d) { return d < 0 ? -d : d; }
 
 		// main API
-		void draw(const math::Point& start, const math::Point& stop)
+		void draw(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth)
 		{
 			auto x0 = start.x();
 			auto y0 = start.y();
@@ -66,10 +66,12 @@ namespace studio
 			{
 				std::swap(x0, x1);
 				std::swap(y0, y1);
+				std::swap(startDepth, stopDepth);
 			}
 
 			auto dx = x1 - x0;
 			auto dy = y1 - y0;
+			auto dz = stopDepth - startDepth;
 			auto gradient = dy / dx;
 
 			// handle first endpoint
@@ -81,13 +83,13 @@ namespace studio
 
 			if (steep)
 			{
-				plot(ypxl1, (long double) xpxl1, rfpart(yend) * xgap);
-				plot(ypxl1 + 1, (long double) xpxl1, fpart(yend) * xgap);
+				plot(ypxl1, (long double) xpxl1, startDepth, rfpart(yend) * xgap);
+				plot(ypxl1 + 1, (long double) xpxl1, startDepth, fpart(yend) * xgap);
 			}
 			else
 			{
-				plot((long double) xpxl1, ypxl1, rfpart(yend) * xgap);
-				plot((long double) xpxl1, ypxl1 + 1, fpart(yend) * xgap);
+				plot((long double) xpxl1, ypxl1, startDepth, rfpart(yend) * xgap);
+				plot((long double) xpxl1, ypxl1 + 1, startDepth, fpart(yend) * xgap);
 			}
 
 			auto intery = yend + gradient; // first y-intersection for the main loop
@@ -101,13 +103,13 @@ namespace studio
 			auto ypxl2 = ipart(yend);
 			if (steep)
 			{
-				plot(ypxl2, (long double) xpxl2, rfpart(yend) * xgap);
-				plot(ypxl2 + 1, (long double) xpxl2, fpart(yend) * xgap);
+				plot(ypxl2, (long double) xpxl2, stopDepth, rfpart(yend) * xgap);
+				plot(ypxl2 + 1, (long double) xpxl2, stopDepth, fpart(yend) * xgap);
 			}
 			else
 			{
-				plot((long double) xpxl2, ypxl2, rfpart(yend) * xgap);
-				plot((long double) xpxl2, ypxl2 + 1, fpart(yend) * xgap);
+				plot((long double) xpxl2, ypxl2, stopDepth, rfpart(yend) * xgap);
+				plot((long double) xpxl2, ypxl2 + 1, stopDepth, fpart(yend) * xgap);
 			}
 
 			// main loop
@@ -116,8 +118,9 @@ namespace studio
 			{
 				for (auto x = xpxl1 + 1; x <= xpxl2 - 1; x++)
 				{
-					plot(ipart(intery), (long double) x, rfpart(intery));
-					plot(ipart(intery) + 1, (long double) x, fpart(intery));
+					auto depth = startDepth + (dz * (x - xpxl1)) / dx;
+					plot(ipart(intery), (long double) x, depth, rfpart(intery));
+					plot(ipart(intery) + 1, (long double) x, depth, fpart(intery));
 					intery = intery + gradient;
 				}
 			}
@@ -125,8 +128,9 @@ namespace studio
 			{
 				for (auto x = xpxl1 + 1; x <= xpxl2 - 1; x++)
 				{
-					plot((long double) x, ipart(intery), rfpart(intery));
-					plot((long double) x, ipart(intery) + 1, fpart(intery));
+					auto depth = startDepth + (dz * (x - xpxl1)) / dx;
+					plot((long double) x, ipart(intery), depth, rfpart(intery));
+					plot((long double) x, ipart(intery) + 1, depth, fpart(intery));
 					intery = intery + gradient;
 				}
 			}

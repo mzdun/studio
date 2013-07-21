@@ -39,12 +39,18 @@
 #include <future>
 #include <iomanip>
 
+#define DEPTH_BUFFER
 #define STEREO_CAMERA
 #define CYAN_MAGENTA
 
 namespace studio
 {
+#ifdef DEPTH_BUFFER
+	typedef GrayscaleDepthBitmap BasicBitmap;
+#else
 	typedef GrayscaleBitmap BasicBitmap;
+#endif
+
 #ifdef STEREO_CAMERA
 #  ifdef CYAN_MAGENTA
 	typedef CyanMagentaCanvas<BasicBitmap> CanvasType;

@@ -29,6 +29,8 @@
 #include "platform_api.hpp"
 #include "canvas.hpp"
 
+#include <limits>
+
 namespace studio
 {
 
@@ -86,7 +88,7 @@ namespace studio
 				*dst++ = *src++;
 			}
 		}
-		void blend(int x, int y, long double brightness)
+		void blend(int x, int y, long double depth, long double brightness)
 		{
 			if (x < 0 || x >= m_width ||
 				y < 0 || y >= m_height)
@@ -160,7 +162,45 @@ namespace studio
 
 		void line(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth) override
 		{
-			make_xwdrawer(*this).draw(tr(start), tr(stop));
+			make_xwdrawer(*this).draw(tr(start), tr(stop), startDepth, stopDepth);
+		}
+
+		void text(const math::Point& pos, const wchar_t* _text, long double depth) override
+		{
+		}
+
+		inline math::Point tr(const math::Point& pt)
+		{
+			return { pt.x() + m_width / 2, -pt.y() + m_height / 2 };
+		}
+	};
+
+	struct GrayscaleDepthBitmap : public Canvas, public PlatformBitmap<BitmapType::G8>
+	{
+		long double* m_depth;
+
+		GrayscaleDepthBitmap(int w, int h)
+			: PlatformBitmap<BitmapType::G8>(w, h)
+			, m_depth(new long double [w*h])
+		{
+			erase();
+
+			long double* ptr = m_depth;
+			long double* end = m_depth + w*h;
+			while (ptr != end)
+			{
+				*ptr++ = std::numeric_limits<long double>::max();
+			}
+		}
+
+		~GrayscaleDepthBitmap()
+		{
+			delete [] m_depth;
+		}
+
+		void line(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth) override
+		{
+			make_xwdrawer(*this).draw(tr(start), tr(stop), startDepth, stopDepth);
 		}
 
 		void text(const math::Point& pos, const wchar_t* _text, long double depth) override
@@ -183,7 +223,7 @@ namespace studio
 
 		void line(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth) override
 		{
-			make_xwdrawer(*this).draw(tr(start), tr(stop));
+			make_xwdrawer(*this).draw(tr(start), tr(stop), startDepth, stopDepth);
 		}
 
 		void text(const math::Point& pos, const wchar_t* _text, long double depth) override
