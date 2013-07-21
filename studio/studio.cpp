@@ -39,13 +39,43 @@
 #include <future>
 #include <iomanip>
 
-#define STEREO_CANVAS
+#define STEREO_CAMERA
+#define CYAN_MAGENTA
 
-#if 1
-typedef studio::CyanMagentaCanvas<> StereoCanvasType;
+namespace studio
+{
+	typedef GrayscaleBitmap BasicBitmap;
+#ifdef STEREO_CAMERA
+#  ifdef CYAN_MAGENTA
+	typedef CyanMagentaCanvas<BasicBitmap> CanvasType;
+#  else
+	typedef SideBySideCanvas<BasicBitmap> CanvasType;
+#  endif
 #else
-typedef studio::SideBySideCanvas<> StereoCanvasType;
+	typedef SimpleCanvas<BasicBitmap> CanvasType;
 #endif
+
+	template <typename Canvas>
+	struct CanvasTraits;
+
+	template <typename Bitmap>
+	struct CanvasTraits<CyanMagentaCanvas<Bitmap>>
+	{
+		typedef StereoCamera CameraType;
+	};
+
+	template <typename Bitmap>
+	struct CanvasTraits<SideBySideCanvas<Bitmap>>
+	{
+		typedef StereoCamera CameraType;
+	};
+
+	template <typename Bitmap>
+	struct CanvasTraits<SimpleCanvas<Bitmap>>
+	{
+		typedef Camera CameraType;
+	};
+}
 
 struct Command {
 	const char* name;
@@ -124,7 +154,15 @@ void setUp(std::shared_ptr<Scene>& scene)
 	scene->add<Block>(577, 352, 48)->translate(700, 545, -96);
 }
 
-std::shared_ptr<StereoCanvasType> g_canvas;
+template <typename CanvasT>
+std::shared_ptr<CanvasT> create_canvas(const std::shared_ptr<studio::Scene>& scene)
+{
+	math::Vertex camPos { 1007.5, 617.5, -1000 };
+	math::Vertex camTarget { camPos + math::Vertex(0, 0, 100) };
+
+	auto cam = scene->add<studio::CanvasTraits<CanvasT>::CameraType>(1000, camPos, camTarget);
+	return cam->create_canvas<CanvasT>(1400, 800);
+}
 
 int test(int argc, char* argv [])
 {
@@ -132,18 +170,7 @@ int test(int argc, char* argv [])
 
 	auto scene = std::make_shared<Scene>();
 	setUp(scene);
-
-	math::Vertex camPos { 1007.5, 617.5, -1000 };
-
-#ifdef STEREO_CANVAS
-	auto canvas = std::make_shared<StereoCanvasType>(1400, 800);
-	g_canvas = canvas;
-	auto cam = scene->add<StereoCamera>(1000, 50, camPos, camPos + math::Vertex(0, 0, 100));
-	cam->setCanvas(canvas.get());
-#else
-	auto cam = scene->add<Camera>(1000, camPos, camPos + math::Vertex(0, 0, 100));
-	auto canvas = cam->create_canvas<SimpleCanvas>(1400, 800);
-#endif
+	auto canvas = create_canvas<studio::CanvasType>(scene);
 
 	scene->renderAllCameras();
 	canvas->save("test.png");
@@ -172,7 +199,6 @@ int test(int argc, char* argv [])
 	tasks.clear();
 #endif
 
-	g_canvas.reset();
 	scene.reset();
 
 	return 0;

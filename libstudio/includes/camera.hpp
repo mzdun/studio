@@ -99,16 +99,19 @@ namespace studio
 		Camera m_leftCam;
 		Camera m_rightCam;
 	public:
-		StereoCamera(long double eye, long double spacing, const math::Vertex& position, const math::Vertex& target)
-			: m_leftCam(eye, position + math::Vertex(-spacing / 2, 0, 0), target + math::Vertex(-spacing / 2, 0, 0))
-			, m_rightCam(eye, position + math::Vertex(spacing / 2, 0, 0), target + math::Vertex(spacing / 2, 0, 0))
+		StereoCamera(long double eye, const math::Vertex& position, const math::Vertex& target)
+			: m_leftCam(eye, position + math::Vertex(-25, 0, 0), target + math::Vertex(-25, 0, 0))
+			, m_rightCam(eye, position + math::Vertex(25, 0, 0), target + math::Vertex(25, 0, 0))
 		{
 		}
 
-		void setCanvas(StereoCanvas* ref)
+		template <typename T, typename... Args>
+		std::shared_ptr<T> create_canvas(Args && ... args)
 		{
+			auto ref = std::make_shared<T>(std::forward<Args>(args)...);
 			m_leftCam.create_canvas<SingleEyeCanvas>(true, ref);
 			m_rightCam.create_canvas<SingleEyeCanvas>(false, ref);
+			return ref;
 		}
 
 		void render(const Triangle* triangle, const math::Matrix& local) const override

@@ -47,9 +47,9 @@ namespace studio
 	class SingleEyeCanvas : public Canvas
 	{
 		bool m_leftEye;
-		StereoCanvas* m_ref;
+		std::shared_ptr<StereoCanvas> m_ref;
 	public:
-		SingleEyeCanvas(bool leftEye, StereoCanvas* ref)
+		SingleEyeCanvas(bool leftEye, const std::shared_ptr<StereoCanvas>& ref)
 			: m_leftEye(leftEye)
 			, m_ref(ref)
 		{
