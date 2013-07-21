@@ -60,6 +60,11 @@ namespace studio
 			return (unsigned char) value;
 		}
 
+		unsigned char* getDst(int x, int y)
+		{
+			return (unsigned char*) m_pixels + (m_height - y) * stride() + x * (BPP >> 3);
+		}
+
 		void blend(int x, int y, unsigned int color, long double brightness)
 		{
 			if (x < 0 || x >= m_width ||
@@ -67,7 +72,7 @@ namespace studio
 			{
 				return;
 			}
-			unsigned char* dst = (unsigned char*) m_pixels + (m_height - y) * stride() + x * (BPP >> 3);
+			unsigned char* dst = getDst(x, y);
 			unsigned char* src = (unsigned char*) &color;
 			for (size_t i = 0; i < (BPP >> 3); i++)
 			{
@@ -81,7 +86,7 @@ namespace studio
 			{
 				return;
 			}
-			unsigned char* dst = (unsigned char*) m_pixels + (m_height - y) * stride() + x * (BPP >> 3);
+			unsigned char* dst = getDst(x, y);
 			unsigned char* src = (unsigned char*) &color;
 			for (size_t i = 0; i < (BPP >> 3); i++)
 			{
@@ -95,7 +100,7 @@ namespace studio
 			{
 				return;
 			}
-			unsigned char* dst = (unsigned char*) m_pixels + (m_height - y) * stride() + x * (BPP >> 3);
+			unsigned char* dst = getDst(x, y);
 			for (size_t i = 0; i < (BPP >> 3); i++)
 			{
 				*dst = blendChannel(0xFF, *dst, brightness); ++dst;
@@ -108,7 +113,7 @@ namespace studio
 			{
 				return;
 			}
-			unsigned char* dst = (unsigned char*) m_pixels + (m_height - y) * stride() + x * (BPP >> 3);
+			unsigned char* dst = getDst(x, y);
 			for (size_t i = 0; i < (BPP >> 3); i++)
 			{
 				*dst++ = 0xFF;
@@ -182,10 +187,14 @@ namespace studio
 	struct GrayscaleDepthBitmap : public Canvas, public PlatformBitmap<BitmapType::G8>
 	{
 		long double* m_depth;
+		long double m_minSet;
+		long double m_maxSet;
 
 		GrayscaleDepthBitmap(int w, int h)
 			: PlatformBitmap<BitmapType::G8>(w, h)
 			, m_depth(new long double [w*h])
+			, m_minSet(std::numeric_limits<long double>::max())
+			, m_maxSet(std::numeric_limits<long double>::min())
 		{
 			erase();
 
@@ -209,10 +218,18 @@ namespace studio
 
 		bool isAbove(int x, int y, long double depth)
 		{
+			if (x < 0 || x >= m_width ||
+				y < 0 || y >= m_height)
+			{
+				return true;
+			}
+
 			long double * ptr = m_depth + y * m_width + x;
-			if (*ptr > depth)
+			if (*ptr >= depth)
 			{
 				*ptr = depth;
+				if (m_minSet > depth) m_minSet = depth;
+				if (m_maxSet < depth) m_maxSet = depth;
 				return true;
 			}
 			return false;
@@ -227,11 +244,33 @@ namespace studio
 		{
 		}
 
+		void floodLine(int y, int start, int stop, long double startDepth, long double stopDepth, unsigned int color);
 		void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) override;
 
 		inline math::Point tr(const math::Point& pt)
 		{
 			return { pt.x() + m_width / 2, -pt.y() + m_height / 2 };
+		}
+
+		void saveDepths(const char* path)
+		{
+			PlatformBitmap<BitmapType::G8> depths(m_width, m_height);
+			depths.erase();
+
+			auto dz = m_maxSet - m_minSet;
+			for (int y = 0; y < m_height; ++y)
+			{
+				auto line = m_depth + y * m_width;
+				for (int x = 0; x < m_width; ++x)
+				{
+					auto z = *line++;
+					if (z > m_maxSet || z < m_minSet)
+						continue;
+
+					depths.plot(x, y, (unsigned char) (0x40 + (m_maxSet - z)*(255 - 0x40) / dz));
+				}
+			}
+			depths.save(path);
 		}
 	};
 
