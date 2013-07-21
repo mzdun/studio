@@ -27,6 +27,7 @@
 #include "triangle.hpp"
 #include <stdlib.h>
 #include <memory.h>
+#include <iomanip>
 
 namespace studio
 {
@@ -82,7 +83,7 @@ namespace studio
 		math::Point points [sizeof(vertices)/sizeof(vertices[0])];
 		project(points, vertices);
 
-		std::cout << ".";
+		std::cout << "." << std::flush;
 
 		if (m_canvas)
 		{
