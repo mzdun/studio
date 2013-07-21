@@ -71,5 +71,8 @@
     <ClInclude Include="..\libstudio\includes\bitmap.hpp">
       <Filter>libstudio\includes</Filter>
     </ClInclude>
+    <ClInclude Include="..\libstudio\includes\canvas_types.hpp">
+      <Filter>libstudio\includes</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
