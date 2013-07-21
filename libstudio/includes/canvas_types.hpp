@@ -59,6 +59,11 @@ namespace studio
 		{
 			(leftEye ? m_leftEye : m_rightEye).text(pos, _text, depth);
 		}
+
+		void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3, bool leftEye) override
+		{
+			(leftEye ? m_leftEye : m_rightEye).flood(p1, p2, p3);
+		}
 	};
 
 	template <typename BasicBitmap = GrayscaleBitmap>

@@ -87,6 +87,11 @@ namespace studio
 
 		if (m_canvas)
 		{
+			m_canvas->flood(
+			{ points[0], vertices[0].z() },
+			{ points[1], vertices[1].z() },
+			{ points[2], vertices[2].z() }
+			);
 			m_canvas->line(points[0], points[1], vertices[0].z(), vertices[1].z());
 			m_canvas->line(points[1], points[2], vertices[1].z(), vertices[2].z());
 		}

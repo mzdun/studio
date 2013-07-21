@@ -169,6 +169,10 @@ namespace studio
 		{
 		}
 
+		void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) override
+		{
+		}
+
 		inline math::Point tr(const math::Point& pt)
 		{
 			return { pt.x() + m_width / 2, -pt.y() + m_height / 2 };
@@ -207,6 +211,10 @@ namespace studio
 		{
 		}
 
+		void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) override
+		{
+		}
+
 		inline math::Point tr(const math::Point& pt)
 		{
 			return { pt.x() + m_width / 2, -pt.y() + m_height / 2 };
@@ -227,6 +235,10 @@ namespace studio
 		}
 
 		void text(const math::Point& pos, const wchar_t* _text, long double depth) override
+		{
+		}
+
+		void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) override
 		{
 		}
 

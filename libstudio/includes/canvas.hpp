@@ -26,15 +26,23 @@
 #define __LIBSTUDIO_CANVAS_HPP__
 
 #include "fundamentals.hpp"
+#include <memory>
 
 namespace studio
 {
+	struct PointWithDepth
+	{
+		math::Point m_pos;
+		long double m_depth;
+	};
+
 	class Canvas
 	{
 	public:
 		virtual ~Canvas(){}
 		virtual void line(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth) = 0;
 		virtual void text(const math::Point& pos, const wchar_t* _text, long double depth) = 0;
+		virtual void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) = 0;
 	};
 
 	struct StereoCanvas
@@ -42,6 +50,7 @@ namespace studio
 		virtual ~StereoCanvas() {}
 		virtual void line(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth, bool leftEye) = 0;
 		virtual void text(const math::Point& pos, const wchar_t* _text, long double depth, bool leftEye) = 0;
+		virtual void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3, bool leftEye) = 0;
 	};
 
 	class SingleEyeCanvas : public Canvas
@@ -63,6 +72,11 @@ namespace studio
 		void text(const math::Point& pos, const wchar_t* _text, long double depth) override
 		{
 			m_ref->text(pos, _text, depth, m_leftEye);
+		}
+
+		void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3)
+		{
+			m_ref->flood(p1, p2, p3, m_leftEye);
 		}
 	};
 
