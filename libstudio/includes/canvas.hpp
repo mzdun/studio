@@ -36,6 +36,36 @@ namespace studio
 		virtual void line(const math::Point& start, const math::Point& stop) = 0;
 		virtual void text(const math::Point& pos, const wchar_t* _text) = 0;
 	};
+
+	struct StereoCanvas
+	{
+		virtual ~StereoCanvas() {}
+		virtual void line(const math::Point& start, const math::Point& stop, bool leftEye) = 0;
+		virtual void text(const math::Point& pos, const wchar_t* _text, bool leftEye) = 0;
+	};
+
+	class SingleEyeCanvas : public Canvas
+	{
+		bool m_leftEye;
+		StereoCanvas* m_ref;
+	public:
+		SingleEyeCanvas(bool leftEye, StereoCanvas* ref)
+			: m_leftEye(leftEye)
+			, m_ref(ref)
+		{
+		}
+
+		void line(const math::Point& start, const math::Point& stop) override
+		{
+			m_ref->line(start, stop, m_leftEye);
+		}
+
+		void text(const math::Point& pos, const wchar_t* _text) override
+		{
+			m_ref->text(pos, _text, m_leftEye);
+		}
+	};
+
 }
 
 #endif //__LIBSTUDIO_CANVAS_HPP__
