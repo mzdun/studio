@@ -31,6 +31,8 @@ namespace studio
 {
 	namespace math
 	{
+		static const long double PI = 3.14159265358979323846264338327950288419716939937510L;
+
 		inline long double __abs(long double ld)
 		{
 			if (ld < 0) return -ld;
@@ -250,6 +252,41 @@ namespace studio
 		inline Vector operator - (const Vertex& lhs, const Vertex& rhs)
 		{
 			return { lhs.x() - rhs.x(), lhs.y() - rhs.y(), lhs.z() - rhs.z() };
+		}
+
+		inline Vertex operator + (const Vertex& lhs, const Vertex& rhs)
+		{
+			return { lhs.x() + rhs.x(), lhs.y() + rhs.y(), lhs.z() + rhs.z() };
+		}
+
+		inline Vertex operator + (const Vector& lhs, const Vertex& rhs)
+		{
+			return { lhs.i() + rhs.x(), lhs.j() + rhs.y(), lhs.k() + rhs.z() };
+		}
+
+		inline Vertex operator + (const Vertex& lhs, const Vector& rhs)
+		{
+			return { lhs.x() + rhs.i(), lhs.y() + rhs.j(), lhs.z() + rhs.k() };
+		}
+
+		inline Vertex operator - (const Vector& lhs, const Vertex& rhs)
+		{
+			return { lhs.i() - rhs.x(), lhs.j() - rhs.y(), lhs.k() - rhs.z() };
+		}
+
+		inline Vertex operator - (const Vertex& lhs, const Vector& rhs)
+		{
+			return { lhs.x() - rhs.i(), lhs.y() - rhs.j(), lhs.z() - rhs.k() };
+		}
+
+		inline Vertex operator / (const Vertex& lhs, long double rhs)
+		{
+			return { lhs.x() / rhs, lhs.y() / rhs, lhs.z() / rhs };
+		}
+
+		inline Vector operator / (const Vector& lhs, long double rhs)
+		{
+			return { lhs.i() / rhs, lhs.j() / rhs, lhs.k() / rhs };
 		}
 
 		inline Vector operator* (const Matrix& lhs, const Vector& rhs)
