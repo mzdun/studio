@@ -42,7 +42,7 @@ namespace studio
 			return m_children.emplace_back<T>(std::forward<Args>(args)...);
 		}
 
-		void renderTo(const Camera* cam, const math::Matrix& parent) const override
+		void renderTo(const ICamera* cam, const math::Matrix& parent) const override
 		{
 			math::Matrix accumulated = parent * localMatrix();
 			for (auto && child : m_children)

@@ -35,7 +35,7 @@ namespace studio
 		typedef math::Vertex vertices_t[3];
 
 		Triangle(const math::Vertex& v1, const math::Vertex& v2, const math::Vertex& v3);
-		void renderTo(const Camera* cam, const math::Matrix& parent) const override;
+		void renderTo(const ICamera* cam, const math::Matrix& parent) const override;
 
 		const vertices_t& vertices() const { return m_vertices; }
 		math::Vector normal() const { return math::Vector::crossProduct(m_vertices[2] - m_vertices[1], m_vertices[0] - m_vertices[1]); }

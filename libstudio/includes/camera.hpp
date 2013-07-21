@@ -33,7 +33,14 @@ namespace studio
 {
 	class Triangle;
 
-	class Camera : public Renderable
+	struct ICamera : public Renderable
+	{
+		virtual void render(const Triangle*, const math::Matrix&) const = 0;
+		virtual void renderLine(const math::Vertex& start, const math::Vertex& stop) const = 0;
+		void renderTo(const ICamera* cam, const math::Matrix& parent) const override {}
+	};
+
+	class Camera : public ICamera
 	{
 		long double m_eye;
 		math::Vertex m_position;
@@ -54,7 +61,6 @@ namespace studio
 			return tmp;
 		}
 
-		void renderTo(const Camera* cam, const math::Matrix& parent) const override {}
 		math::Vector normal() const { return m_target - m_position; }
 		void transform(math::Vertex& pt, const math::Matrix& local) const;
 		long double project(long double z, long double other) const
@@ -86,6 +92,36 @@ namespace studio
 
 		math::Vertex position() const { return m_position; }
 		math::Vertex target() const { return m_target; }
+	};
+
+	class StereoCamera : public ICamera
+	{
+		Camera m_leftCam;
+		Camera m_rightCam;
+	public:
+		StereoCamera(long double eye, long double spacing, const math::Vertex& position, const math::Vertex& target)
+			: m_leftCam(eye, position + math::Vertex(-spacing / 2, 0, 0), target + math::Vertex(-spacing / 2, 0, 0))
+			, m_rightCam(eye, position + math::Vertex(spacing / 2, 0, 0), target + math::Vertex(spacing / 2, 0, 0))
+		{
+		}
+
+		void setCanvas(StereoCanvas* ref)
+		{
+			m_leftCam.create_canvas<SingleEyeCanvas>(true, ref);
+			m_rightCam.create_canvas<SingleEyeCanvas>(false, ref);
+		}
+
+		void render(const Triangle* triangle, const math::Matrix& local) const override
+		{
+			m_leftCam.render(triangle, local);
+			m_rightCam.render(triangle, local);
+		}
+
+		void renderLine(const math::Vertex& start, const math::Vertex& stop) const override
+		{
+			m_leftCam.renderLine(start, stop);
+			m_rightCam.renderLine(start, stop);
+		}
 	};
 }
 

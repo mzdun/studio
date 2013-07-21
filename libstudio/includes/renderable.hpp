@@ -29,7 +29,7 @@
 
 namespace studio
 {
-	class Camera;
+	struct ICamera;
 
 	class Renderable
 	{
@@ -38,7 +38,7 @@ namespace studio
 
 		virtual ~Renderable() {}
 
-		virtual void renderTo(const Camera* cam, const math::Matrix& parent) const = 0;
+		virtual void renderTo(const ICamera* cam, const math::Matrix& parent) const = 0;
 		virtual math::Vector normal() const
 		{
 			static math::Vector def(1, 0, 0); // i-hat

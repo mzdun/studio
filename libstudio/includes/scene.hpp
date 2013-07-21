@@ -32,7 +32,7 @@ namespace studio
 {
 	class Scene : public Container
 	{
-		typedef std::shared_vector<Camera> Cameras;
+		typedef std::shared_vector<ICamera> Cameras;
 		Cameras m_cameras;
 
 		template <typename T1, typename T2>
@@ -56,7 +56,7 @@ namespace studio
 		template <typename T, typename... Args>
 		std::shared_ptr<T> add(Args && ... args)
 		{
-			return _if< is_<T, Camera>::val >::get(*this).emplace_back<T>(std::forward<Args>(args)...);
+			return _if< is_<T, ICamera>::val >::get(*this).emplace_back<T>(std::forward<Args>(args)...);
 		}
 
 		void renderAllCameras() const
@@ -65,7 +65,7 @@ namespace studio
 				renderTo(cam.get());
 		}
 
-		void renderTo(const Camera* cam) const
+		void renderTo(const ICamera* cam) const
 		{
 			Container::renderTo(cam, math::Matrix::identity());
 		}

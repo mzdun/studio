@@ -35,7 +35,7 @@ namespace studio
 		m_vertices[2] = v3;
 	}
 
-	void Triangle::renderTo(const Camera* cam, const math::Matrix& parent) const
+	void Triangle::renderTo(const ICamera* cam, const math::Matrix& parent) const
 	{
 		cam->render(this, parent * localMatrix());
 	}
