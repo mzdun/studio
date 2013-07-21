@@ -153,6 +153,25 @@ namespace studio
 			}
 		};
 
+		class Point
+		{
+			enum { my_width = 2 };
+			long double m_data[2];
+		public:
+			Point()
+			{
+				m_data[0] = m_data[1] = 0;
+			}
+			Point(long double x, long double y)
+			{
+				m_data[0] = x;
+				m_data[1] = y;
+			}
+			MATRIX_OPS(Point);
+			MATRIX_PROP(x, 0);
+			MATRIX_PROP(y, 1);
+		};
+
 		class Vertex : public MatrixBase<1, 4>
 		{
 		public:

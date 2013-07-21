@@ -75,6 +75,7 @@
   <ItemGroup>
     <ClInclude Include="..\libstudio\includes\block.hpp" />
     <ClInclude Include="..\libstudio\includes\camera.hpp" />
+    <ClInclude Include="..\libstudio\includes\canvas.hpp" />
     <ClInclude Include="..\libstudio\includes\container.hpp" />
     <ClInclude Include="..\libstudio\includes\shared_vector.hpp" />
     <ClInclude Include="..\libstudio\includes\fundamentals.hpp" />

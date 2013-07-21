@@ -56,5 +56,8 @@
     <ClInclude Include="..\libstudio\includes\block.hpp">
       <Filter>libstudio\includes</Filter>
     </ClInclude>
+    <ClInclude Include="..\libstudio\includes\canvas.hpp">
+      <Filter>libstudio\includes</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
