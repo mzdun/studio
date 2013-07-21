@@ -52,22 +52,6 @@ namespace studio
 			long double& at(size_t x, size_t y) { return m_data[x + y * width]; }
 		};
 
-		template <size_t common, size_t width, size_t height>
-		void matrix_multiply(MatrixBase<width, height>& out, const MatrixBase<common, height>& lhs, const MatrixBase<width, common>& rhs)
-		{
-			for (size_t w = 0; w < width; ++w)
-			{
-				for (size_t h = 0; h < height; ++h)
-				{
-					out.at(w, h) = 0;
-					for (size_t c = 0; c < common; ++c)
-					{
-						out.at(w, h) += lhs.at(c, h) * rhs.at(w, c);
-					}
-				}
-			}
-		}
-
 #define MATRIX_OPS(Type) \
 	typedef Type my_t; \
 	Type(const Type& rhs) \
@@ -150,6 +134,37 @@ namespace studio
 				long double cosTheta = std::cos(theta);
 				long double sinTheta = std::sin(theta);
 				return Matrix().set_at(0, 0, cosTheta).set_at(1, 0, -sinTheta).set_at(0, 1, sinTheta).set_at(1, 1, cosTheta);
+			}
+
+			bool is_identity() const
+			{
+				for (size_t i = 0; i < sizeof(m_data) / sizeof(m_data[0]); ++i)
+					if (m_data[i] != (i % 5 ? 0 : 1)) return false;
+
+				return true;
+			}
+
+
+			template <typename T>
+			T multiply(const T& rhs) const
+			{
+				static_assert(my_width == T::my_height, "Only matrices of height 4 allowed");
+				if (is_identity())
+					return rhs;
+
+				T out;
+				for (size_t w = 0; w < T::my_width; ++w)
+				{
+					for (size_t h = 0; h < T::my_height; ++h)
+					{
+						out.at(w, h) = 0;
+						for (size_t c = 0; c < my_width; ++c)
+						{
+							out.at(w, h) += at(c, h) * rhs.at(w, c);
+						}
+					}
+				}
+				return out;
 			}
 		};
 
@@ -239,23 +254,17 @@ namespace studio
 
 		inline Vector operator* (const Matrix& lhs, const Vector& rhs)
 		{
-			Vector v;
-			matrix_multiply(v, lhs, rhs);
-			return v;
+			return lhs.multiply(rhs);
 		}
 
 		inline Vertex operator* (const Matrix& lhs, const Vertex& rhs)
 		{
-			Vertex v;
-			matrix_multiply(v, lhs, rhs);
-			return v;
+			return lhs.multiply(rhs);
 		}
 
 		inline Matrix operator* (const Matrix& lhs, const Matrix& rhs)
 		{
-			Matrix m;
-			matrix_multiply(m, lhs, rhs);
-			return m;
+			return lhs.multiply(rhs);
 		}
 
 	}
