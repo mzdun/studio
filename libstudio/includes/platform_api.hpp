@@ -27,6 +27,12 @@
 
 namespace studio
 {
+	enum class BitmapType
+	{
+		RGB24,
+		G8
+	};
+
 	struct PlatformBitmapAPI
 	{
 		virtual ~PlatformBitmapAPI() {}
@@ -34,7 +40,7 @@ namespace studio
 		static bool initAPI();
 		static void shutdownAPI();
 
-		static PlatformBitmapAPI* createBitmap(int w, int h, int bpp);
+		static PlatformBitmapAPI* createBitmap(int w, int h, BitmapType type);
 
 		virtual unsigned char* getPixels() = 0;
 		virtual void save(const char* filename) = 0;

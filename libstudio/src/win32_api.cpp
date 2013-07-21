@@ -65,11 +65,11 @@ namespace studio
 		return -1;  // Failure
 	}
 
-	template <size_t BPP>
+	template <BitmapType Type>
 	struct PlatformBitmapCreator;
 
 	template <>
-	struct PlatformBitmapCreator<8>
+	struct PlatformBitmapCreator<BitmapType::G8>
 	{
 		static void createBitmap(int w, int h, HBITMAP& hBmp, unsigned char*& pixels)
 		{
@@ -100,7 +100,7 @@ namespace studio
 	};
 
 	template <>
-	struct PlatformBitmapCreator<24>
+	struct PlatformBitmapCreator<BitmapType::RGB24>
 	{
 		static void createBitmap(int w, int h, HBITMAP& hBmp, unsigned char*& pixels)
 		{
@@ -177,21 +177,22 @@ namespace studio
 		Gdiplus::GdiplusShutdown(s_gdiplusToken);
 	}
 
-	PlatformBitmapAPI* PlatformBitmapAPI::createBitmap(int w, int h, int bpp)
+	template <BitmapType Type>
+	static PlatformBitmapAPI* create(int w, int h)
 	{
-		if (bpp != 8 && bpp != 24)
-			return nullptr;
-
 		WindowsBitmapAPI* api = new (std::nothrow) WindowsBitmapAPI();
-
-		if (bpp == 8)
-			PlatformBitmapCreator<8>::createBitmap(w, h, api->m_hBitmap, api->m_pixels);
-		else if (bpp == 24)
-			PlatformBitmapCreator<24>::createBitmap(w, h, api->m_hBitmap, api->m_pixels);
-		else
-			return nullptr;
-
+		PlatformBitmapCreator<Type>::createBitmap(w, h, api->m_hBitmap, api->m_pixels);
 		return api;
+	}
+
+	PlatformBitmapAPI* PlatformBitmapAPI::createBitmap(int w, int h, BitmapType type)
+	{
+		switch (type)
+		{
+		case BitmapType::RGB24: return create<BitmapType::RGB24>(w, h);
+		case BitmapType::G8: return create<BitmapType::G8>(w, h);
+		}
+		return nullptr;
 	}
 
 }
