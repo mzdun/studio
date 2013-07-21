@@ -84,6 +84,7 @@
     <ClInclude Include="..\libstudio\includes\renderable.hpp" />
     <ClInclude Include="..\libstudio\includes\scene.hpp" />
     <ClInclude Include="..\libstudio\includes\triangle.hpp" />
+    <ClInclude Include="..\libstudio\includes\xwline.hpp" />
     <ClInclude Include="..\libstudio\pch.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
