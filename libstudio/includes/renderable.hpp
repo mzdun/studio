@@ -45,11 +45,6 @@ namespace studio
 			return def;
 		}
 
-		virtual bool faces(const Renderable* rhs) const
-		{
-			return math::Vector::cosTheta(normal(), rhs->normal()) < 0.0;
-		}
-
 		const math::Matrix& localMatrix() const { return m_local; }
 	};
 }

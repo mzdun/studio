@@ -39,14 +39,6 @@ namespace studio
 		//TODO: apply pitch and yaw as resulting from m_target
 	}
 
-	bool Camera::canSee(const math::Vertex& pt) const
-	{
-		// is the point on the right side of XY plane?
-		// test on being inside visibility cone is not enough - a triangle with all vertices
-		// outside of it still can be visible, as it stretches through the cone...
-		return pt.z() >= 0;
-	}
-
 	void Camera::render(const Triangle* triangle, const math::Matrix& local) const
 	{
 		Triangle::vertices_t vertices;
@@ -56,11 +48,5 @@ namespace studio
 				*pt++ = vertex;
 		}
 		transformPoints(vertices, local);
-
-		if (!Triangle(vertices[0], vertices[1], vertices[2]).faces(this))
-			return;
-
-		if (!canSee(vertices))
-			return;
 	}
 }

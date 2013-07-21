@@ -38,7 +38,7 @@ namespace studio
 		void renderTo(const Camera* cam, const math::Matrix& parent) const override;
 
 		const vertices_t& vertices() const { return m_vertices; }
-		math::Vector normal() const { return math::Vector::crossProduct(m_vertices[0] - m_vertices[1], m_vertices[2] - m_vertices[1]); }
+		math::Vector normal() const { return math::Vector::crossProduct(m_vertices[2] - m_vertices[1], m_vertices[0] - m_vertices[1]); }
 	private:
 		vertices_t m_vertices;
 	};

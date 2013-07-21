@@ -44,23 +44,13 @@ namespace studio
 		void renderTo(const Camera* cam, const math::Matrix& parent) const override {}
 		math::Vector normal() const { return m_target - m_position; }
 		void transform(math::Vertex& pt, const math::Matrix& local) const;
-		bool canSee(const math::Vertex& pt) const;
+
 
 		template <size_t len>
 		void transformPoints(math::Vertex(&points)[len], const math::Matrix& local) const
 		{
 			for (auto && pt : points)
 				transform(pt, local);
-		}
-
-		template <size_t len>
-		bool canSee(const math::Vertex(&points)[len]) const
-		{
-			// is at least one vertex visible?
-			bool ret = false;
-			for (auto && pt : points)
-				ret |= canSee(pt);
-			return ret;
 		}
 
 		void render(const Triangle*, const math::Matrix&) const;
