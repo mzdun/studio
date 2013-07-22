@@ -99,7 +99,24 @@ namespace studio
 			break;
 		case Render::Solid:
 			{
-				UniformShader white(0xFFFFFF);
+				unsigned char shade = 0xFF;
+				auto intensity = 1.0l;
+				auto midpoint = ((vertices[0] + vertices[2]) / 2);// +vertices[1]) / 2;
+				if (!lights.empty())
+				{
+					intensity = 0;
+					for (auto && light : lights)
+					{
+						intensity += 1.0 - math::Vector::cosTheta(
+							Triangle(vertices[0], vertices[1], vertices[2]).normal(),
+							midpoint - light->position()
+							);
+					}
+					intensity /= 2.0;
+					intensity /= lights.size();
+				}
+				unsigned int color = (unsigned char)(intensity * shade);
+				UniformShader white(color | (color << 8) | (color << 16) | (color << 24));
 				m_canvas->fill(
 				{ points[0], vertices[0].z() },
 				{ points[1], vertices[1].z() },
