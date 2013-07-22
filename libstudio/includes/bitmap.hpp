@@ -157,17 +157,18 @@ namespace studio
 		}
 	};
 
-	struct GrayscaleBitmap : public Canvas, public PlatformBitmap<BitmapType::G8>
+	template <typename T>
+	struct CanvasImpl: Canvas
 	{
-		GrayscaleBitmap(int w, int h)
-			: PlatformBitmap<BitmapType::G8>(w, h)
+		CanvasImpl()
+			: m_renderType(Render::Wireframe)
 		{
-			erase();
 		}
 
 		void line(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth) override
 		{
-			make_xwdrawer(*this).draw(tr(start), tr(stop), startDepth, stopDepth);
+			auto pThis = static_cast<T*>(this);
+			make_xwdrawer(*pThis).draw(tr(start), tr(stop), startDepth, stopDepth);
 		}
 
 		void text(const math::Point& pos, const wchar_t* _text, long double depth) override
@@ -178,13 +179,28 @@ namespace studio
 		{
 		}
 
+		Render getRenderType() const override { return m_renderType; }
+		void setRenderType(Render renderType) { m_renderType = renderType; }
+
 		inline math::Point tr(const math::Point& pt)
 		{
-			return { pt.x() + m_width / 2, -pt.y() + m_height / 2 };
+			auto pThis = static_cast<T*>(this);
+			return { pt.x() + pThis->m_width / 2, -pt.y() + pThis->m_height / 2 };
+		}
+	private:
+		Render m_renderType;
+	};
+
+	struct GrayscaleBitmap : public CanvasImpl<GrayscaleBitmap>, public PlatformBitmap<BitmapType::G8>
+	{
+		GrayscaleBitmap(int w, int h)
+			: PlatformBitmap<BitmapType::G8>(w, h)
+		{
+			erase();
 		}
 	};
 
-	struct GrayscaleDepthBitmap : public Canvas, public PlatformBitmap<BitmapType::G8>
+	struct GrayscaleDepthBitmap : public CanvasImpl<GrayscaleDepthBitmap>, public PlatformBitmap<BitmapType::G8>
 	{
 		long double* m_depth;
 		long double m_minSet;
@@ -211,11 +227,6 @@ namespace studio
 			delete [] m_depth;
 		}
 
-		void line(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth) override
-		{
-			make_xwdrawer(*this).draw(tr(start), tr(stop), startDepth, stopDepth);
-		}
-
 		bool isAbove(int x, int y, long double depth)
 		{
 			if (x < 0 || x >= m_width ||
@@ -238,10 +249,6 @@ namespace studio
 		{
 			if (isAbove(x, y, depth))
 				PlatformBitmap<BitmapType::G8>::blend(x, y, depth, brightness);
-		}
-
-		void text(const math::Point& pos, const wchar_t* _text, long double depth) override
-		{
 		}
 
 		void floodLine(int y, int start, int stop, long double startDepth, long double stopDepth, unsigned int color);
@@ -274,30 +281,12 @@ namespace studio
 		}
 	};
 
-	struct ColorBitmap : public Canvas, public PlatformBitmap<BitmapType::RGB24>
+	struct ColorBitmap : public CanvasImpl<ColorBitmap>, public PlatformBitmap<BitmapType::RGB24>
 	{
 		ColorBitmap(int w, int h)
 			: PlatformBitmap<BitmapType::RGB24>(w, h)
 		{
 			erase();
-		}
-
-		void line(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth) override
-		{
-			make_xwdrawer(*this).draw(tr(start), tr(stop), startDepth, stopDepth);
-		}
-
-		void text(const math::Point& pos, const wchar_t* _text, long double depth) override
-		{
-		}
-
-		void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) override
-		{
-		}
-
-		inline math::Point tr(const math::Point& pt)
-		{
-			return { pt.x() + m_width / 2, -pt.y() + m_height / 2 };
 		}
 	};
 }

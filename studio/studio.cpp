@@ -177,6 +177,9 @@ int test(int argc, char* argv [])
 	auto scene = std::make_shared<Scene>();
 	setUp(scene);
 	auto canvas = create_canvas<studio::CanvasType>(scene);
+#ifdef DEPTH_BUFFER
+	canvas->setRenderType(Render::Solid);
+#endif
 
 	scene->renderAllCameras();
 	canvas->save("test.png");

@@ -36,6 +36,12 @@ namespace studio
 		long double m_depth;
 	};
 
+	enum class Render
+	{
+		Wireframe,
+		Solid
+	};
+
 	class Canvas
 	{
 	public:
@@ -43,6 +49,7 @@ namespace studio
 		virtual void line(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth) = 0;
 		virtual void text(const math::Point& pos, const wchar_t* _text, long double depth) = 0;
 		virtual void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) = 0;
+		virtual Render getRenderType() const = 0;
 	};
 
 	struct StereoCanvas
@@ -51,6 +58,7 @@ namespace studio
 		virtual void line(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth, bool leftEye) = 0;
 		virtual void text(const math::Point& pos, const wchar_t* _text, long double depth, bool leftEye) = 0;
 		virtual void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3, bool leftEye) = 0;
+		virtual Render getRenderType(bool leftEye) const = 0;
 	};
 
 	class SingleEyeCanvas : public Canvas
@@ -74,9 +82,14 @@ namespace studio
 			m_ref->text(pos, _text, depth, m_leftEye);
 		}
 
-		void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3)
+		void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) override
 		{
 			m_ref->flood(p1, p2, p3, m_leftEye);
+		}
+
+		Render getRenderType() const override
+		{
+			return m_ref->getRenderType(m_leftEye);
 		}
 	};
 

@@ -64,6 +64,17 @@ namespace studio
 		{
 			(leftEye ? m_leftEye : m_rightEye).flood(p1, p2, p3);
 		}
+
+		Render getRenderType(bool leftEye) const override
+		{
+			return (leftEye ? m_leftEye : m_rightEye).getRenderType();
+		}
+
+		void setRenderType(Render renderType)
+		{
+			m_leftEye.setRenderType(renderType);
+			m_rightEye.setRenderType(renderType);
+		}
 	};
 
 	template <typename BasicBitmap = GrayscaleBitmap>
@@ -74,6 +85,11 @@ namespace studio
 			: StereoCanvasImpl<BasicBitmap>(w, h)
 			, ColorBitmap(w, h)
 		{
+		}
+
+		void setRenderType(Render renderType)
+		{
+			StereoCanvasImpl<BasicBitmap>::setRenderType(renderType);
 		}
 
 		void save(const char* path)
@@ -135,7 +151,12 @@ namespace studio
 		{
 		}
 
-		void srcCopy(int x, int y, const GrayscaleBitmap& eye)
+		void setRenderType(Render renderType)
+		{
+			StereoCanvasImpl<BasicBitmap>::setRenderType(renderType);
+		}
+
+		void srcCopy(int x, int y, const BasicBitmap& eye)
 		{
 			int eyeX = 0;
 			int eyeY = 0;
