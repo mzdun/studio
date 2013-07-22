@@ -77,5 +77,8 @@
     <ClInclude Include="..\libstudio\includes\canvas_types.hpp">
       <Filter>libstudio\includes</Filter>
     </ClInclude>
+    <ClInclude Include="..\libstudio\includes\shader.hpp">
+      <Filter>libstudio\includes</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
