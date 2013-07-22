@@ -81,6 +81,7 @@
     <ClInclude Include="..\libstudio\includes\canvas.hpp" />
     <ClInclude Include="..\libstudio\includes\canvas_types.hpp" />
     <ClInclude Include="..\libstudio\includes\container.hpp" />
+    <ClInclude Include="..\libstudio\includes\light.hpp" />
     <ClInclude Include="..\libstudio\includes\platform_api.hpp" />
     <ClInclude Include="..\libstudio\includes\shader.hpp" />
     <ClInclude Include="..\libstudio\includes\shared_vector.hpp" />

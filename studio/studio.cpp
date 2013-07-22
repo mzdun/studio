@@ -160,6 +160,13 @@ void setUp(std::shared_ptr<Scene>& scene)
 	scene->add<Block>(577, 352, 48)->translate(700, 545, -96);
 }
 
+void lights(const std::shared_ptr<studio::Scene>& scene)
+{
+	math::Vertex lightPos { 1007.5, 617.5, -1000 }; //same as camera's
+
+	scene->add<studio::SimpleLight>(lightPos);
+}
+
 template <typename CanvasT>
 std::shared_ptr<CanvasT> create_canvas(const std::shared_ptr<studio::Scene>& scene)
 {
@@ -176,6 +183,7 @@ int test(int argc, char* argv [])
 
 	auto scene = std::make_shared<Scene>();
 	setUp(scene);
+	lights(scene);
 	auto canvas = create_canvas<studio::CanvasType>(scene);
 #ifdef DEPTH_BUFFER
 	canvas->setRenderType(Render::Solid);

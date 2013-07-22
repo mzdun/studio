@@ -28,6 +28,7 @@
 #include "container.hpp"
 #include "camera.hpp"
 #include "shared_vector.hpp"
+#include "light.hpp"
 
 namespace studio
 {
@@ -35,6 +36,7 @@ namespace studio
 	{
 		typedef std::shared_vector<ICamera> Cameras;
 		Cameras m_cameras;
+		Lights m_lights;
 
 		template <typename T1, typename T2>
 		struct is_
@@ -58,13 +60,21 @@ namespace studio
 		struct choose { typedef T type; };
 
 		struct camera { static inline Cameras& get(Scene& ref) { return ref.m_cameras; } };
+		struct light { static inline Lights& get(Scene& ref) { return ref.m_lights; } };
 		struct rest { static inline Renderables& get(Scene& ref) { return ref.m_children; } };
 
 	public:
 		template <typename T, typename... Args>
 		std::shared_ptr<T> add(Args && ... args)
 		{
-			typedef typename If< is_<T, ICamera>::val, choose<camera>, choose<rest>>::type children;
+			typedef typename
+				If< is_<T, ICamera>::val,
+					choose<camera>,
+					If < is_<T, Light>::val,
+						choose<light>,
+						choose<rest>
+					>
+				>::type children;
 			return children::get(*this).emplace_back<T>(std::forward<Args>(args)...);
 		}
 
