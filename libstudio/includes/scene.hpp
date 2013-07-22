@@ -27,6 +27,7 @@
 
 #include "container.hpp"
 #include "camera.hpp"
+#include "shared_vector.hpp"
 
 namespace studio
 {
@@ -44,19 +45,27 @@ namespace studio
 			enum { val = (sizeof(test(marker())) == sizeof(char) ) };
 		};
 
-		template <bool is_camera>
-		struct _if;
-		template <>
-		struct _if<true> { static inline Cameras& get(Scene& ref) { return ref.m_cameras; } };
+		template <bool expression, typename T1, typename T2>
+		struct If;
 
-		template <>
-		struct _if<false> { static inline Renderables& get(Scene& ref) { return ref.m_children; } };
+		template <typename T1, typename T2>
+		struct If<true, T1, T2> { typedef typename T1::type type; };
+
+		template <typename T1, typename T2>
+		struct If<false, T1, T2> { typedef typename T2::type type; };
+
+		template <typename T>
+		struct choose { typedef T type; };
+
+		struct camera { static inline Cameras& get(Scene& ref) { return ref.m_cameras; } };
+		struct rest { static inline Renderables& get(Scene& ref) { return ref.m_children; } };
 
 	public:
 		template <typename T, typename... Args>
 		std::shared_ptr<T> add(Args && ... args)
 		{
-			return _if< is_<T, ICamera>::val >::get(*this).emplace_back<T>(std::forward<Args>(args)...);
+			typedef typename If< is_<T, ICamera>::val, choose<camera>, choose<rest>>::type children;
+			return children::get(*this).emplace_back<T>(std::forward<Args>(args)...);
 		}
 
 		void renderAllCameras() const
