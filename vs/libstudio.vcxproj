@@ -71,6 +71,7 @@
     <ClCompile Include="..\libstudio\src\block.cpp" />
     <ClCompile Include="..\libstudio\src\camera.cpp" />
     <ClCompile Include="..\libstudio\src\fundamentals.cpp" />
+    <ClCompile Include="..\libstudio\src\shader.cpp" />
     <ClCompile Include="..\libstudio\src\triangle.cpp" />
     <ClCompile Include="..\libstudio\src\win32_api.cpp" />
   </ItemGroup>

@@ -67,7 +67,7 @@ namespace studio
 		{
 			auto z = (long double)x / dx;
 			if (isAbove(start + x, y, startDepth + dz * x / dx))
-				plot(start + x, y, shader->shade({ (long double) start + x, (long double) y }));
+				plot(start + x, y, shader->shade(revTr({ (long double) start + x, (long double) y })));
 		}
 	}
 

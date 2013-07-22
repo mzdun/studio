@@ -49,6 +49,24 @@ namespace studio
 		return (int) (ld + 0.5);
 	}
 
+	static long double getIntensity(const Lights& lights, math::Vector& normal, math::Vertex& point)
+	{
+		auto intensity = 1.0l;
+		if (!lights.empty())
+		{
+			intensity = 0;
+			for (auto && light : lights)
+			{
+				intensity += 1.0 - math::Vector::cosTheta(
+					normal, point - light->position()
+					);
+			}
+			intensity /= 2.0;
+			intensity /= lights.size();
+		}
+		return intensity;
+	}
+
 	void Camera::render(const Triangle* triangle, const math::Matrix& local, const Lights& lights) const
 	{
 		Triangle::vertices_t vertices;
@@ -99,24 +117,20 @@ namespace studio
 			break;
 		case Render::Solid:
 			{
-				unsigned char shade = 0xFF;
-				auto intensity = 1.0l;
+				auto norm = Triangle(vertices[0], vertices[1], vertices[2]).normal();
+#if 0
 				auto midpoint = ((vertices[0] + vertices[2]) / 2);// +vertices[1]) / 2;
-				if (!lights.empty())
-				{
-					intensity = 0;
-					for (auto && light : lights)
-					{
-						intensity += 1.0 - math::Vector::cosTheta(
-							Triangle(vertices[0], vertices[1], vertices[2]).normal(),
-							midpoint - light->position()
-							);
-					}
-					intensity /= 2.0;
-					intensity /= lights.size();
-				}
+				auto intensity = getIntensity(lights, norm, midpoint);
+				unsigned char shade = 0xFF;
 				unsigned int color = (unsigned char)(intensity * shade);
 				UniformShader white(color | (color << 8) | (color << 16) | (color << 24));
+#else
+				auto int0 = getIntensity(lights, norm, vertices[0]);
+				auto int1 = getIntensity(lights, norm, vertices[0]);
+				auto int2 = getIntensity(lights, norm, vertices[0]);
+
+				LinearShader white(0xFFFFFF, points[0], points[1], points[2], int0, int1, int2);
+#endif
 				m_canvas->fill(
 				{ points[0], vertices[0].z() },
 				{ points[1], vertices[1].z() },

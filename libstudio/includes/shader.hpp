@@ -35,7 +35,7 @@ namespace studio
 		virtual unsigned char shade(const math::Point& pt) = 0;
 	};
 
-	class UniformShader: public Shader
+	class UniformShader : public Shader
 	{
 		unsigned int m_color;
 	public:
@@ -47,6 +47,53 @@ namespace studio
 		{
 			return m_color;
 		}
+	};
+
+	class LinearShader : public Shader
+	{
+		unsigned int m_color;
+
+		struct ShadedPoint
+		{
+			long double x;
+			long double y;
+			long double intensity;
+			ShadedPoint() {}
+			ShadedPoint(const math::Point& pt, long double intensity)
+				: x(pt.x())
+				, y(pt.y())
+				, intensity(intensity)
+			{
+			}
+		};
+
+		struct Delta
+		{
+			long double dx;
+			long double dy;
+			long double dInt;
+			Delta() {}
+			Delta(const ShadedPoint& p0, const ShadedPoint& p1)
+				: dx(p1.x - p0.x)
+				, dy(p1.y - p0.y)
+				, dInt(p1.intensity - p0.intensity)
+			{
+			}
+
+			std::pair<long double, long double> interpolate(long double y, const ShadedPoint& pt)
+			{
+				auto step = (y - pt.y) / dy;
+				return std::make_pair(pt.x + step * dx, pt.intensity + step * dInt);
+			}
+		};
+
+		ShadedPoint m_func[3];
+		Delta A, B, C;
+
+		long double interpolate(const math::Point& pt);
+	public:
+		LinearShader(unsigned int color, const math::Point& p0, const math::Point& p1, const math::Point& p2, long double int0, long double int1, long double int2);
+		unsigned char shade(const math::Point& pt) override;
 	};
 }
 

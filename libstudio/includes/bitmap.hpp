@@ -191,6 +191,12 @@ namespace studio
 			auto pThis = static_cast<T*>(this);
 			return { pt.x() + pThis->m_width / 2, -pt.y() + pThis->m_height / 2 };
 		}
+
+		inline math::Point revTr(const math::Point& pt)
+		{
+			auto pThis = static_cast<T*>(this);
+			return { pt.x() - pThis->m_width / 2, -(pt.y() - pThis->m_height / 2) };
+		}
 	private:
 		Render m_renderType;
 	};
