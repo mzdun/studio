@@ -35,9 +35,9 @@ namespace studio
 
 	struct ICamera : public Renderable
 	{
-		virtual void render(const Triangle*, const math::Matrix&) const = 0;
-		virtual void renderLine(const math::Vertex& start, const math::Vertex& stop) const = 0;
-		void renderTo(const ICamera* cam, const math::Matrix& parent) const override {}
+		virtual void render(const Triangle*, const math::Matrix&, const Lights& lights) const = 0;
+		virtual void renderLine(const math::Vertex& start, const math::Vertex& stop, const Lights& lights) const = 0;
+		void renderTo(const ICamera* cam, const math::Matrix& parent, const Lights& lights) const override {}
 	};
 
 	class Camera : public ICamera
@@ -87,8 +87,8 @@ namespace studio
 				*dest++ = project(src);
 		}
 
-		virtual void render(const Triangle*, const math::Matrix&) const;
-		virtual void renderLine(const math::Vertex& start, const math::Vertex& stop) const;
+		virtual void render(const Triangle*, const math::Matrix&, const Lights& lights) const;
+		virtual void renderLine(const math::Vertex& start, const math::Vertex& stop, const Lights& lights) const;
 
 		math::Vertex position() const { return m_position; }
 		math::Vertex target() const { return m_target; }
@@ -114,16 +114,16 @@ namespace studio
 			return ref;
 		}
 
-		void render(const Triangle* triangle, const math::Matrix& local) const override
+		void render(const Triangle* triangle, const math::Matrix& local, const Lights& lights) const override
 		{
-			m_leftCam.render(triangle, local);
-			m_rightCam.render(triangle, local);
+			m_leftCam.render(triangle, local, lights);
+			m_rightCam.render(triangle, local, lights);
 		}
 
-		void renderLine(const math::Vertex& start, const math::Vertex& stop) const override
+		void renderLine(const math::Vertex& start, const math::Vertex& stop, const Lights& lights) const override
 		{
-			m_leftCam.renderLine(start, stop);
-			m_rightCam.renderLine(start, stop);
+			m_leftCam.renderLine(start, stop, lights);
+			m_rightCam.renderLine(start, stop, lights);
 		}
 	};
 }

@@ -86,7 +86,7 @@ namespace studio
 
 		void renderTo(const ICamera* cam) const
 		{
-			Container::renderTo(cam, math::Matrix::identity());
+			Container::renderTo(cam, math::Matrix::identity(), m_lights);
 		}
 	};
 }

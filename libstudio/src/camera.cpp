@@ -49,7 +49,7 @@ namespace studio
 		return (int) (ld + 0.5);
 	}
 
-	void Camera::render(const Triangle* triangle, const math::Matrix& local) const
+	void Camera::render(const Triangle* triangle, const math::Matrix& local, const Lights& lights) const
 	{
 		Triangle::vertices_t vertices;
 		{
@@ -111,7 +111,7 @@ namespace studio
 		}
 	}
 
-	void Camera::renderLine(const math::Vertex& start, const math::Vertex& stop) const
+	void Camera::renderLine(const math::Vertex& start, const math::Vertex& stop, const Lights& lights) const
 	{
 		math::Vertex vertices [2] = {start, stop};
 		transformPoints(vertices, math::Matrix::identity());

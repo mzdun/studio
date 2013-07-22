@@ -26,6 +26,7 @@
 #define __LIBSTUDIO_RENDERABLE_HPP__
 
 #include "fundamentals.hpp"
+#include "light.hpp"
 
 namespace studio
 {
@@ -38,7 +39,7 @@ namespace studio
 
 		virtual ~Renderable() {}
 
-		virtual void renderTo(const ICamera* cam, const math::Matrix& parent) const = 0;
+		virtual void renderTo(const ICamera* cam, const math::Matrix& parent, const Lights& lights) const = 0;
 		virtual math::Vector normal() const
 		{
 			static math::Vector def(1, 0, 0); // i-hat
