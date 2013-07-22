@@ -42,13 +42,13 @@ namespace studio
 
 	class Camera : public ICamera
 	{
-		long double m_eye;
+		fixed m_eye;
 		math::Vertex m_position;
 		math::Vertex m_target;
 		std::shared_ptr<Canvas> m_canvas;
 
 	public:
-		Camera(long double eye, const math::Vertex& position, const math::Vertex& target)
+		Camera(const fixed& eye, const math::Vertex& position, const math::Vertex& target)
 			: m_eye(eye)
 			, m_position(position)
 			, m_target(target)
@@ -63,7 +63,7 @@ namespace studio
 
 		math::Vector normal() const { return m_target - m_position; }
 		void transform(math::Vertex& pt, const math::Matrix& local) const;
-		long double project(long double z, long double other) const
+		fixed project(const fixed& z, const fixed& other) const
 		{
 			return other * m_eye / (m_eye + z);
 		}
@@ -99,7 +99,7 @@ namespace studio
 		Camera m_leftCam;
 		Camera m_rightCam;
 	public:
-		StereoCamera(long double eye, const math::Vertex& position, const math::Vertex& target)
+		StereoCamera(const fixed& eye, const math::Vertex& position, const math::Vertex& target)
 			: m_leftCam(eye, position + math::Vertex(-25, 0, 0), target + math::Vertex(-25, 0, 0))
 			, m_rightCam(eye, position + math::Vertex(25, 0, 0), target + math::Vertex(25, 0, 0))
 		{

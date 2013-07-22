@@ -70,7 +70,7 @@ namespace studio
 
 		// BW only...
 		auto R = (unsigned char) (m_color & 0xFF);
-		auto color = (unsigned int) (R * intensity);
+		auto color = cast<unsigned int>(R * intensity);
 		return color | (color << 8) | (color << 16) | (color << 24);
 	}
 }

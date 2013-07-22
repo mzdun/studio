@@ -34,7 +34,7 @@ namespace studio
 	struct PointWithDepth
 	{
 		math::Point m_pos;
-		long double m_depth;
+		fixed m_depth;
 	};
 
 	enum class Render
@@ -47,8 +47,8 @@ namespace studio
 	{
 	public:
 		virtual ~Canvas(){}
-		virtual void line(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth) = 0;
-		virtual void text(const math::Point& pos, const wchar_t* _text, long double depth) = 0;
+		virtual void line(const math::Point& start, const math::Point& stop, const fixed& startDepth, const fixed& stopDepth) = 0;
+		virtual void text(const math::Point& pos, const wchar_t* _text, const fixed& depth) = 0;
 		virtual void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) = 0;
 		virtual void fill(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3, Shader* shader) = 0;
 		virtual Render getRenderType() const = 0;
@@ -57,8 +57,8 @@ namespace studio
 	struct StereoCanvas
 	{
 		virtual ~StereoCanvas() {}
-		virtual void line(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth, bool leftEye) = 0;
-		virtual void text(const math::Point& pos, const wchar_t* _text, long double depth, bool leftEye) = 0;
+		virtual void line(const math::Point& start, const math::Point& stop, const fixed& startDepth, const fixed& stopDepth, bool leftEye) = 0;
+		virtual void text(const math::Point& pos, const wchar_t* _text, const fixed& depth, bool leftEye) = 0;
 		virtual void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3, bool leftEye) = 0;
 		virtual void fill(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3, Shader* shader, bool leftEye) = 0;
 		virtual Render getRenderType(bool leftEye) const = 0;
@@ -75,12 +75,12 @@ namespace studio
 		{
 		}
 
-		void line(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth) override
+		void line(const math::Point& start, const math::Point& stop, const fixed& startDepth, const fixed& stopDepth) override
 		{
 			m_ref->line(start, stop, startDepth, stopDepth, m_leftEye);
 		}
 
-		void text(const math::Point& pos, const wchar_t* _text, long double depth) override
+		void text(const math::Point& pos, const wchar_t* _text, const fixed& depth) override
 		{
 			m_ref->text(pos, _text, depth, m_leftEye);
 		}

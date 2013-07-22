@@ -32,7 +32,7 @@ namespace studio
 	class Block : public Container
 	{
 	public:
-		Block(long double width, long double height, long double depth);
+		Block(const fixed& width, const fixed& height, const fixed& depth);
 	};
 }
 

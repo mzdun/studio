@@ -55,17 +55,17 @@ namespace studio
 		std::vector<math::Vertex> m_lights;
 		math::Vector m_normal;
 
-		long double getIntensity(const math::Vertex& point) const
+		fixed getIntensity(const math::Vertex& point) const
 		{
-			auto intensity = 1.0l;
+			fixed intensity = 1;
 			if (!m_lights.empty())
 			{
 				intensity = 0;
 				for (auto && light : m_lights)
 				{
-					intensity += 1.0 - math::Vector::cosTheta(m_normal, point - light);
+					intensity += 1 - math::Vector::cosTheta(m_normal, point - light);
 				}
-				intensity /= 2.0;
+				intensity /= 2;
 				intensity /= m_lights.size();
 			}
 			return intensity;

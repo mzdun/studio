@@ -164,7 +164,7 @@ void setUp(std::shared_ptr<Scene>& scene)
 
 void lights(const std::shared_ptr<studio::Scene>& scene)
 {
-	math::Vertex lightPos { 1007.5, 1030, -1000 }; //same as camera's
+	math::Vertex lightPos { fixed(1007.5), 1030, -1000 }; //same as camera's
 
 	scene->add<studio::SimpleLight>(lightPos + math::Vertex(800, 0, 0));
 	scene->add<studio::SimpleLight>(lightPos + math::Vertex(-800, 0, 0));
@@ -173,7 +173,7 @@ void lights(const std::shared_ptr<studio::Scene>& scene)
 template <typename CanvasT>
 std::shared_ptr<CanvasT> create_canvas(const std::shared_ptr<studio::Scene>& scene)
 {
-	math::Vertex camPos { 1007.5, 617.5, -1000 };
+	math::Vertex camPos { fixed(1007.5), fixed(617.5), -1000 };
 	math::Vertex camTarget { camPos + math::Vertex(0, 0, 100) };
 
 	auto cam = scene->add<studio::CanvasTraits<CanvasT>::CameraType>(1000, camPos, camTarget);

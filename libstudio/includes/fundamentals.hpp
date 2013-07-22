@@ -33,25 +33,113 @@ namespace studio
 	{
 		static const long double PI = 3.14159265358979323846264338327950288419716939937510L;
 
-		inline long double __abs(long double ld)
+#define PROXY_OP_M(op) \
+	fixed& operator op(const fixed& rhs) { v op rhs.v; return *this; } \
+	fixed& operator op(long double rhs) { v op rhs; return *this; } \
+	fixed& operator op(double rhs) { v op rhs; return *this; } \
+	fixed& operator op(float rhs) { v op rhs; return *this; } \
+	fixed& operator op(long long rhs) { v op rhs; return *this; } \
+	fixed& operator op(long rhs) { v op rhs; return *this; } \
+	fixed& operator op(int rhs) { v op rhs; return *this; } \
+	fixed& operator op(unsigned long long rhs) { v op rhs; return *this; } \
+	fixed& operator op(unsigned long rhs) { v op rhs; return *this; } \
+	fixed& operator op(unsigned int rhs) { v op rhs; return *this; }
+#define PROXY_OP_HELPER(op, type) \
+	inline fixed operator op(type lhs, const fixed& rhs) { return fixed(lhs op rhs.v); } \
+	inline fixed operator op(const fixed& lhs, type rhs) { return fixed(lhs.v op rhs); }
+
+#define PROXY_OP(op) \
+	inline fixed operator op(const fixed& lhs, const fixed& rhs) { return fixed(lhs.v op rhs.v); } \
+	PROXY_OP_HELPER(op, long double) \
+	PROXY_OP_HELPER(op, double) \
+	PROXY_OP_HELPER(op, float) \
+	PROXY_OP_HELPER(op, long long) \
+	PROXY_OP_HELPER(op, long) \
+	PROXY_OP_HELPER(op, int) \
+	PROXY_OP_HELPER(op, unsigned long long) \
+	PROXY_OP_HELPER(op, unsigned long) \
+	PROXY_OP_HELPER(op, unsigned int)
+
+#define PROXY_OP_UNARY(op) inline fixed operator op () const { return fixed(-v); }
+#define PROXY_CMP_HELPER(op, type) \
+	inline bool operator op(type lhs, const fixed& rhs) { return lhs op rhs.v; } \
+	inline bool operator op(const fixed& lhs, type rhs) { return lhs.v op rhs; }
+#define PROXY_CMP(op) \
+	inline bool operator op(const fixed& lhs, const fixed& rhs) { return lhs.v op rhs.v; } \
+	PROXY_CMP_HELPER(op, long double) \
+	PROXY_CMP_HELPER(op, double) \
+	PROXY_CMP_HELPER(op, float) \
+	PROXY_CMP_HELPER(op, long int) \
+	PROXY_CMP_HELPER(op, int)
+
+		struct fixed
 		{
-			if (ld < 0) return -ld;
+			float v;
+			fixed(): v(0) {}
+			fixed(fixed && rhs) : v(rhs.v) { }
+			fixed(long long v) : v(v) {}
+			fixed(int v) : v(v) {}
+			fixed(unsigned long long v) : v(v) {}
+			fixed(unsigned int v) : v(v) {}
+
+			explicit fixed(long double v) : v(v) {}
+			explicit fixed(double v) : v(v) {}
+			explicit fixed(float v) : v(v) {}
+
+			fixed& operator = (fixed && rhs) { v = rhs.v; return *this; }
+			fixed& operator = (const fixed& rhs) { v = rhs.v; return *this; }
+			fixed& operator = (long long rhs) { v = rhs; return *this; }
+			fixed& operator = (int rhs) { v = rhs; return *this; }
+			fixed& operator = (unsigned long long rhs) { v = rhs; return *this; }
+			fixed& operator = (unsigned int rhs) { v = rhs; return *this; }
+
+			PROXY_OP_M( += );
+			PROXY_OP_M( -= );
+			PROXY_OP_M( *= );
+			PROXY_OP_M( /= );
+			PROXY_OP_UNARY(-);
+			PROXY_OP_UNARY(+);
+		private:
+		};
+
+		PROXY_CMP( == );
+		PROXY_CMP( != );
+		PROXY_CMP( <  );
+		PROXY_CMP( >  );
+		PROXY_CMP( <= );
+		PROXY_CMP( >= );
+
+		PROXY_OP( + );
+		PROXY_OP( - );
+		PROXY_OP( * );
+		PROXY_OP( / );
+
+		inline fixed __abs(const fixed& ld)
+		{
+			if (ld.v < 0) return fixed{ -ld.v };
 			return ld;
 		}
+
+		inline fixed sin(const fixed& v) { return fixed(std::sin(v.v)); }
+		inline fixed cos(const fixed& v) { return fixed(std::cos(v.v)); }
+		inline fixed sqrt(const fixed& v) { return fixed(std::sqrt(v.v)); }
+
+		template <typename T>
+		inline T cast(const fixed& v) { return (T)v.v; }
 
 		template <size_t width, size_t height>
 		class MatrixBase
 		{
 		protected:
-			long double m_data[width*height];
+			fixed m_data[width*height];
 		public:
 			enum
 			{
 				my_width = width,
 				my_height = height
 			};
-			long double at(size_t x, size_t y) const { return m_data[x + y * width]; }
-			long double& at(size_t x, size_t y) { return m_data[x + y * width]; }
+			fixed at(size_t x, size_t y) const { return m_data[x + y * width]; }
+			fixed& at(size_t x, size_t y) { return m_data[x + y * width]; }
 		};
 
 #define MATRIX_OPS(Type) \
@@ -67,7 +155,7 @@ namespace studio
 		for (size_t i = 0; i < sizeof(m_data) / sizeof(m_data[0]); ++i) \
 		{\
 			m_data[i] = rhs.m_data[i]; \
-			rhs.m_data[i] = 0; \
+			rhs.m_data[i] = fixed(); \
 		}\
 	} \
 \
@@ -83,17 +171,17 @@ namespace studio
 		for (size_t i = 0; i < sizeof(m_data) / sizeof(m_data[0]); ++i) \
 		{\
 			m_data[i] = rhs.m_data[i]; \
-			rhs.m_data[i] = 0; \
+			rhs.m_data[i] = fixed(); \
 		}\
 		return *this; \
 	} \
 \
-	my_t& set_at(size_t x, size_t y, long double val) { m_data[x + y * my_width] = val; return *this; }
+	my_t& set_at(size_t x, size_t y, const fixed& val) { m_data[x + y * my_width] = val; return *this; }
 
 #define MATRIX_PROP(name, pos) \
-	long double name() const { return m_data[pos]; } \
-	long double& name() { return m_data[pos]; } \
-	my_t& set_ ## name(long double val) { m_data[pos] = val; return *this; }
+	const fixed& name() const { return m_data[pos]; } \
+	fixed& name() { return m_data[pos]; } \
+	my_t& set_ ## name(const fixed& val) { m_data[pos] = val; return *this; }
 
 
 		class Matrix : public MatrixBase<4, 4>
@@ -109,32 +197,34 @@ namespace studio
 			MATRIX_OPS(Matrix)
 
 			static Matrix identity() { return Matrix(); }
-			static Matrix translate(long double dx, long double dy = 0, long double dz = 0)
+			static Matrix translate(const fixed& dx, const fixed& dy = fixed(), const fixed& dz = fixed())
 			{
 				return Matrix().set_at(3, 0, dx).set_at(3, 1, dy).set_at(3, 2, dz);
 			}
-			static Matrix scale(long double sx, long double sy = 0, long double sz = 0)
+			static Matrix scale(const fixed& sx, const fixed& sy = fixed(), const fixed& sz = fixed())
 			{
-				if (__abs(sy) < 0.00001) sy = sx;
-				if (__abs(sz) < 0.00001) sz = sy;
-				return Matrix().set_at(0, 0, sx).set_at(1, 1, sy).set_at(2, 2, sz);
+				auto _sy = sy;
+				auto _sz = sz;
+				if (__abs(sy) < fixed(0.00001)) _sy = sx;
+				if (__abs(sz) < fixed(0.00001)) _sz = sy;
+				return Matrix().set_at(0, 0, sx).set_at(1, 1, _sy).set_at(2, 2, _sz);
 			}
-			static Matrix rotateX(long double theta)
+			static Matrix rotateX(const fixed& theta)
 			{
-				long double cosTheta = std::cos(theta);
-				long double sinTheta = std::sin(theta);
+				fixed cosTheta = cos(theta);
+				fixed sinTheta = sin(theta);
 				return Matrix().set_at(2, 2, cosTheta).set_at(3, 2, -sinTheta).set_at(2, 3, sinTheta).set_at(3, 3, cosTheta);
 			}
-			static Matrix rotateY(long double theta)
+			static Matrix rotateY(const fixed& theta)
 			{
-				long double cosTheta = std::cos(theta);
-				long double sinTheta = std::sin(theta);
+				fixed cosTheta = cos(theta);
+				fixed sinTheta = sin(theta);
 				return Matrix().set_at(0, 0, cosTheta).set_at(3, 0, sinTheta).set_at(0, 3, -sinTheta).set_at(3, 3, cosTheta);
 			}
-			static Matrix rotateZ(long double theta)
+			static Matrix rotateZ(const fixed& theta)
 			{
-				long double cosTheta = std::cos(theta);
-				long double sinTheta = std::sin(theta);
+				fixed cosTheta = cos(theta);
+				fixed sinTheta = sin(theta);
 				return Matrix().set_at(0, 0, cosTheta).set_at(1, 0, -sinTheta).set_at(0, 1, sinTheta).set_at(1, 1, cosTheta);
 			}
 
@@ -159,7 +249,7 @@ namespace studio
 				{
 					for (size_t h = 0; h < T::my_height; ++h)
 					{
-						out.at(w, h) = 0;
+						out.at(w, h) = fixed();
 						for (size_t c = 0; c < my_width; ++c)
 						{
 							out.at(w, h) += at(c, h) * rhs.at(w, c);
@@ -173,13 +263,13 @@ namespace studio
 		class Point
 		{
 			enum { my_width = 2 };
-			long double m_data[2];
+			fixed m_data[2];
 		public:
 			Point()
 			{
-				m_data[0] = m_data[1] = 0;
+				m_data[0] = m_data[1] = fixed();
 			}
-			Point(long double x, long double y)
+			Point(const fixed& x, const fixed& y)
 			{
 				m_data[0] = x;
 				m_data[1] = y;
@@ -195,15 +285,22 @@ namespace studio
 			Vertex()
 			{
 				for (size_t i = 0; i < my_height - 1; ++i)
-					m_data[i] = 0;
-				m_data[my_height - 1] = 1;
+					m_data[i] = fixed();
+				m_data[my_height - 1] = fixed(1);
 			}
-			Vertex(long double x, long double y, long double z)
+			Vertex(const fixed& x, const fixed& y, const fixed& z)
 			{
 				m_data[0] = x;
 				m_data[1] = y;
 				m_data[2] = z;
-				m_data[3] = 1;
+				m_data[3] = fixed(1);
+			}
+			Vertex(long long x, long long y, long long z)
+			{
+				m_data[0] = fixed(x);
+				m_data[1] = fixed(y);
+				m_data[2] = fixed(z);
+				m_data[3] = fixed(1);
 			}
 			MATRIX_OPS(Vertex);
 			MATRIX_PROP(x, 0);
@@ -217,22 +314,22 @@ namespace studio
 			Vector()
 			{
 				for (size_t i = 0; i < my_height; ++i)
-					m_data[i] = i == my_height - 1 ? 1 : 0;
+					m_data[i] = fixed(i == my_height - 1 ? 1 : 0);
 			}
-			Vector(long double i, long double j, long double k)
+			Vector(const fixed& i, const fixed& j, const fixed& k)
 			{
 				m_data[0] = i;
 				m_data[1] = j;
 				m_data[2] = k;
-				m_data[3] = 1;
+				m_data[3] = fixed(1);
 			}
 			MATRIX_OPS(Vector);
 			MATRIX_PROP(i, 0);
 			MATRIX_PROP(j, 1);
 			MATRIX_PROP(k, 2);
 
-			long double length() const { return std::sqrt(lengthSquared()); }
-			long double lengthSquared() const { return dotProduct(*this, *this); }
+			fixed length() const { return sqrt(lengthSquared()); }
+			fixed lengthSquared() const { return dotProduct(*this, *this); }
 
 #define COORD(next, prev) (lhs.next() * rhs.prev() - rhs.next() * lhs.prev())
 			static Vector crossProduct(const Vector& lhs, const Vector& rhs)
@@ -241,12 +338,12 @@ namespace studio
 			}
 #undef COORD
 
-			static long double dotProduct(const Vector& lhs, const Vector& rhs)
+			static fixed dotProduct(const Vector& lhs, const Vector& rhs)
 			{
 				return lhs.i() * rhs.i() + lhs.j() * rhs.j() + lhs.k() * rhs.k();
 			}
 
-			static long double cosTheta(const Vector& lhs, const Vector& rhs);
+			static fixed cosTheta(const Vector& lhs, const Vector& rhs);
 		};
 
 		inline Vector operator - (const Vertex& lhs, const Vertex& rhs)
@@ -279,12 +376,12 @@ namespace studio
 			return { lhs.x() - rhs.i(), lhs.y() - rhs.j(), lhs.z() - rhs.k() };
 		}
 
-		inline Vertex operator / (const Vertex& lhs, long double rhs)
+		inline Vertex operator / (const Vertex& lhs, const fixed& rhs)
 		{
 			return { lhs.x() / rhs, lhs.y() / rhs, lhs.z() / rhs };
 		}
 
-		inline Vector operator / (const Vector& lhs, long double rhs)
+		inline Vector operator / (const Vector& lhs, const fixed& rhs)
 		{
 			return { lhs.i() / rhs, lhs.j() / rhs, lhs.k() / rhs };
 		}
@@ -304,6 +401,16 @@ namespace studio
 			return lhs.multiply(rhs);
 		}
 
+	}
+
+	using math::fixed;
+	using math::cast;
+
+	inline void swap(studio::math::fixed& _Left, studio::math::fixed& _Right)
+	{
+		studio::math::fixed _Tmp = std::move(_Left);
+		_Left = std::move(_Right);
+		_Right = std::move(_Tmp);
 	}
 }
 

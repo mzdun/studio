@@ -57,12 +57,12 @@ namespace studio
 
 		struct ProjectedPoint
 		{
-			long double x;
-			long double y;
+			fixed y;
+			fixed x;
 
-			long double x3;
-			long double y3;
-			long double z3;
+			fixed x3;
+			fixed y3;
+			fixed z3;
 
 			ProjectedPoint() {}
 			ProjectedPoint(const math::Point& p, const math::Vertex& v)
@@ -73,7 +73,7 @@ namespace studio
 				, z3(v.z())
 			{
 			}
-			ProjectedPoint(long double x, long double y, long double x3, long double y3, long double z3)
+			ProjectedPoint(const fixed& x, const fixed& y, const fixed& x3, const fixed& y3, const fixed& z3)
 				: x(x)
 				, y(y)
 				, x3(x3)
@@ -84,12 +84,12 @@ namespace studio
 
 		struct Delta
 		{
-			long double dx;
-			long double dy;
+			fixed dy;
+			fixed dx;
 
-			long double dx3;
-			long double dy3;
-			long double dz3;
+			fixed dx3;
+			fixed dy3;
+			fixed dz3;
 
 			Delta() {}
 			Delta(const ProjectedPoint& p0, const ProjectedPoint& p1)
@@ -101,13 +101,13 @@ namespace studio
 			{
 			}
 
-			ProjectedPoint interpolate(long double y, const ProjectedPoint& pt)
+			ProjectedPoint interpolate(const fixed& y, const ProjectedPoint& pt)
 			{
 				auto step = (y - pt.y) / dy;
 				return { pt.x + step * dx, y, pt.x3 + step * dx3, pt.y3 + step * dy3, pt.z3 + step * dz3 };
 			}
 
-			ProjectedPoint interpolate(const ProjectedPoint& pt, long double x)
+			ProjectedPoint interpolate(const ProjectedPoint& pt, const fixed& x)
 			{
 				auto step = (x - pt.x) / dx;
 				return { x, pt.y + step * dy, pt.x3 + step * dx3, pt.y3 + step * dy3, pt.z3 + step * dz3 };

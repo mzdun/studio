@@ -29,16 +29,16 @@ namespace studio
 {
 	namespace math
 	{
-		long double Vector::cosTheta(const Vector& lhs, const Vector& rhs)
+		fixed Vector::cosTheta(const Vector& lhs, const Vector& rhs)
 		{
 			auto scalar = dotProduct(lhs, rhs);
-			if (__abs(scalar) < 0.00001)
-				return 0;
+			if (__abs(scalar) < fixed(0.00001))
+				return fixed();
 
 			auto magnitudes = lhs.length() * rhs.length();
 
-			if (__abs(magnitudes) < 0.00001)
-				return 1.0;
+			if (__abs(scalar) < fixed(0.00001))
+				return fixed(1);
 
 			return scalar / magnitudes;
 		}

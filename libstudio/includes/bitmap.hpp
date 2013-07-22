@@ -52,9 +52,9 @@ namespace studio
 		int bytesPerLine() const { return m_width * (BPP >> 3); }
 		int stride() const { return ((bytesPerLine() + 3) >> 2) << 2; }
 		void erase() { memset(m_pixels, 0, stride() * m_height); }
-		static inline unsigned char blendChannel(unsigned char over, unsigned char under, long double brightness)
+		static inline unsigned char blendChannel(unsigned char over, unsigned char under, const fixed& brightness)
 		{
-			int value = (int) (brightness * over + (1.0l - brightness) * under);
+			int value = cast<int>(brightness * over + (1 - brightness) * under);
 			if (value < 0) value = 0;
 			if (value > 0xFF) value = 0xFF;
 			return (unsigned char) value;
@@ -65,7 +65,7 @@ namespace studio
 			return (unsigned char*) m_pixels + (m_height - y) * stride() + x * (BPP >> 3);
 		}
 
-		void blend(int x, int y, unsigned int color, long double brightness)
+		void blend(int x, int y, unsigned int color, const fixed& brightness)
 		{
 			if (x < 0 || x >= m_width ||
 				y < 0 || y >= m_height)
@@ -93,7 +93,7 @@ namespace studio
 				*dst++ = *src++;
 			}
 		}
-		void blend(int x, int y, long double depth, long double brightness)
+		void blend(int x, int y, const fixed& depth, const fixed& brightness)
 		{
 			if (x < 0 || x >= m_width ||
 				y < 0 || y >= m_height)
@@ -165,13 +165,13 @@ namespace studio
 		{
 		}
 
-		void line(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth) override
+		void line(const math::Point& start, const math::Point& stop, const fixed& startDepth, const fixed& stopDepth) override
 		{
 			auto pThis = static_cast<T*>(this);
 			make_xwdrawer(*pThis).draw(tr(start), tr(stop), startDepth, stopDepth);
 		}
 
-		void text(const math::Point& pos, const wchar_t* _text, long double depth) override
+		void text(const math::Point& pos, const wchar_t* _text, const fixed& depth) override
 		{
 		}
 
@@ -212,23 +212,23 @@ namespace studio
 
 	struct GrayscaleDepthBitmap : public CanvasImpl<GrayscaleDepthBitmap>, public PlatformBitmap<BitmapType::G8>
 	{
-		long double* m_depth;
-		long double m_minSet;
-		long double m_maxSet;
+		fixed* m_depth;
+		fixed m_minSet;
+		fixed m_maxSet;
 
 		GrayscaleDepthBitmap(int w, int h)
 			: PlatformBitmap<BitmapType::G8>(w, h)
-			, m_depth(new long double [w*h])
+			, m_depth(new fixed [w*h])
 			, m_minSet(std::numeric_limits<long double>::max())
 			, m_maxSet(std::numeric_limits<long double>::min())
 		{
 			erase();
 
-			long double* ptr = m_depth;
-			long double* end = m_depth + w*h;
+			fixed* ptr = m_depth;
+			fixed* end = m_depth + w*h;
 			while (ptr != end)
 			{
-				*ptr++ = std::numeric_limits<long double>::max();
+				*ptr++ = fixed(std::numeric_limits<long double>::max());
 			}
 		}
 
@@ -237,7 +237,7 @@ namespace studio
 			delete [] m_depth;
 		}
 
-		bool isAbove(int x, int y, long double depth)
+		bool isAbove(int x, int y, const fixed& depth)
 		{
 			if (x < 0 || x >= m_width ||
 				y < 0 || y >= m_height)
@@ -245,7 +245,7 @@ namespace studio
 				return true;
 			}
 
-			long double * ptr = m_depth + y * m_width + x;
+			fixed * ptr = m_depth + y * m_width + x;
 			if (*ptr > depth)
 			{
 				*ptr = depth;
@@ -255,13 +255,13 @@ namespace studio
 			}
 			return false;
 		}
-		void blend(int x, int y, long double depth, long double brightness)
+		void blend(int x, int y, const fixed& depth, const fixed& brightness)
 		{
 			if (isAbove(x, y, depth))
 				PlatformBitmap<BitmapType::G8>::blend(x, y, depth, brightness);
 		}
 
-		void floodLine(int y, int start, int stop, long double startDepth, long double stopDepth, Shader* shader);
+		void floodLine(int y, int start, int stop, const fixed& startDepth, const fixed& stopDepth, Shader* shader);
 		void floodFill(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3, Shader* shader);
 		void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) override
 		{
@@ -293,7 +293,7 @@ namespace studio
 					if (z > m_maxSet || z < m_minSet)
 						continue;
 
-					depths.plot(x, y, (unsigned char) (0x40 + (m_maxSet - z)*(255 - 0x40) / dz));
+					depths.plot(x, y, cast<unsigned char>(0x40 + (m_maxSet - z)*(255 - 0x40) / dz));
 				}
 			}
 			depths.save(path);

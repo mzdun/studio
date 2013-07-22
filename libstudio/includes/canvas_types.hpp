@@ -50,12 +50,12 @@ namespace studio
 		{
 		}
 
-		void line(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth, bool leftEye) override
+		void line(const math::Point& start, const math::Point& stop, const fixed& startDepth, const fixed& stopDepth, bool leftEye) override
 		{
 			(leftEye ? m_leftEye : m_rightEye).line(start, stop, startDepth, stopDepth);
 		}
 
-		void text(const math::Point& pos, const wchar_t* _text, long double depth, bool leftEye) override
+		void text(const math::Point& pos, const wchar_t* _text, const fixed& depth, bool leftEye) override
 		{
 			(leftEye ? m_leftEye : m_rightEye).text(pos, _text, depth);
 		}

@@ -34,7 +34,7 @@ namespace studio
 		b->add<Triangle>(br, bl, tl);
 	}
 
-	Block::Block(long double width, long double height, long double depth)
+	Block::Block(const fixed& width, const fixed& height, const fixed& depth)
 	{
 		math::Vertex a(0, 0, 0), b(width, 0, 0), c(width, height, 0), d(0, height, 0),
 			e(0, 0, depth), f(width, 0, depth), g(width, height, depth), h(0, height, depth);

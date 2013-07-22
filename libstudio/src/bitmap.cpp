@@ -30,9 +30,9 @@ namespace studio
 {
 	struct SlopePart
 	{
-		long double v0, v1;
-		long double dv;
-		SlopePart(long double v0, long double v1)
+		fixed v0, v1;
+		fixed dv;
+		SlopePart(const fixed& v0, const fixed& v1)
 			: v0(v0)
 			, v1(v1)
 			, dv(v1 - v0)
@@ -43,14 +43,14 @@ namespace studio
 	{
 		SlopePart y, x, z;
 
-		Slope(long double y0, long double y1, long double x0, long double x1, long double z0, long double z1)
+		Slope(const fixed& y0, const fixed& y1, const fixed& x0, const fixed& x1, const fixed& z0, const fixed& z1)
 			: y(y0, y1)
 			, x(x0, x1)
 			, z(z0, z1)
 		{
 		}
 
-		void calc(long double Y, long double& X, long double& Z)
+		void calc(const fixed& Y, fixed& X, fixed& Z)
 		{
 			auto dY = Y - y.v0;
 			X = x.v0 + dY * x.dv / y.dv;
@@ -58,16 +58,15 @@ namespace studio
 		}
 	};
 
-	void GrayscaleDepthBitmap::floodLine(int y, int start, int stop, long double startDepth, long double stopDepth, Shader* shader)
+	void GrayscaleDepthBitmap::floodLine(int y, int start, int stop, const fixed& startDepth, const fixed& stopDepth, Shader* shader)
 	{
 		auto dz = stopDepth - startDepth;
 		int dx = stop - start;
 
 		for (int x = 0; x < dx; x++)
 		{
-			auto z = (long double)x / dx;
-			if (isAbove(start + x, y, startDepth + dz * x / dx))
-				plot(start + x, y, shader->shade(revTr({ (long double) start + x, (long double) y })));
+			if (isAbove(start + x, y, startDepth + dz * fixed(x) / fixed(dx)))
+				plot(start + x, y, shader->shade(revTr({ fixed(start + x), fixed(y) })));
 		}
 	}
 
@@ -84,13 +83,13 @@ namespace studio
 		Slope B(pts[0].m_pos.y(), pts[2].m_pos.y(), pts[0].m_pos.x(), pts[2].m_pos.x(), pts[0].m_depth, pts[2].m_depth);
 		Slope C(pts[1].m_pos.y(), pts[2].m_pos.y(), pts[1].m_pos.x(), pts[2].m_pos.x(), pts[1].m_depth, pts[2].m_depth);
 
-		int y0 = (int) (pts[0].m_pos.y() + 1);
-		int y1 = (int) (pts[1].m_pos.y() + 1);
-		int y2 = (int) (pts[2].m_pos.y() + 1);
+		int y0 = cast<int>(pts[0].m_pos.y() + 1);
+		int y1 = cast<int>(pts[1].m_pos.y() + 1);
+		int y2 = cast<int>(pts[2].m_pos.y() + 1);
 
 		for (int y = y0; y < y1; y++)
 		{
-			long double x0, x1, z0, z1;
+			fixed x0, x1, z0, z1;
 			B.calc(y, x0, z0);
 			A.calc(y, x1, z1);
 
@@ -104,12 +103,12 @@ namespace studio
 				std::swap(z0, z1);
 			}
 
-			floodLine(y, (int) x0, (int) x1, z0, z1, shader);
+			floodLine(y, cast<int>(x0), cast<int>(x1), z0, z1, shader);
 		}
 
 		for (int y = y1; y < y2; y++)
 		{
-			long double x0, x1, z0, z1;
+			fixed x0, x1, z0, z1;
 			B.calc(y, x0, z0);
 			C.calc(y, x1, z1);
 
@@ -119,7 +118,7 @@ namespace studio
 				std::swap(z0, z1);
 			}
 
-			floodLine(y, (int) x0, (int) x1, z0, z1, shader);
+			floodLine(y, cast<int>(x0), cast<int>(x1), z0, z1, shader);
 		}
 	}
 }

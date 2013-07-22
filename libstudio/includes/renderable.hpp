@@ -53,27 +53,27 @@ namespace studio
 			m_local = math::Matrix::identity();
 		}
 
-		void translate(long double dx, long double dy = 0, long double dz = 0)
+		void translate(const fixed& dx, const fixed& dy = fixed(), const fixed& dz = fixed())
 		{
 			m_local = m_local * math::Matrix::translate(dx, dy, dz);
 		}
 
-		void scale(long double sx, long double sy = 0, long double sz = 0)
+		void scale(const fixed& sx, const fixed& sy = fixed(), const fixed& sz = fixed())
 		{
 			m_local = m_local * math::Matrix::scale(sx, sy, sz);
 		}
 
-		void rotateX(long double theta)
+		void rotateX(const fixed& theta)
 		{
 			m_local = m_local * math::Matrix::rotateX(theta);
 		}
 
-		void rotateY(long double theta)
+		void rotateY(const fixed& theta)
 		{
 			m_local = m_local * math::Matrix::rotateY(theta);
 		}
 
-		void rotateZ(long double theta)
+		void rotateZ(const fixed& theta)
 		{
 			m_local = m_local * math::Matrix::rotateZ(theta);
 		}
