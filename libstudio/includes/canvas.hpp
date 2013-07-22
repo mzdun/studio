@@ -49,6 +49,7 @@ namespace studio
 		virtual void line(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth) = 0;
 		virtual void text(const math::Point& pos, const wchar_t* _text, long double depth) = 0;
 		virtual void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) = 0;
+		virtual void fill(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) = 0;
 		virtual Render getRenderType() const = 0;
 	};
 
@@ -58,6 +59,7 @@ namespace studio
 		virtual void line(const math::Point& start, const math::Point& stop, long double startDepth, long double stopDepth, bool leftEye) = 0;
 		virtual void text(const math::Point& pos, const wchar_t* _text, long double depth, bool leftEye) = 0;
 		virtual void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3, bool leftEye) = 0;
+		virtual void fill(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3, bool leftEye) = 0;
 		virtual Render getRenderType(bool leftEye) const = 0;
 	};
 
@@ -85,6 +87,11 @@ namespace studio
 		void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) override
 		{
 			m_ref->flood(p1, p2, p3, m_leftEye);
+		}
+
+		void fill(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) override
+		{
+			m_ref->fill(p1, p2, p3, m_leftEye);
 		}
 
 		Render getRenderType() const override

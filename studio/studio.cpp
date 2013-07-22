@@ -39,8 +39,8 @@
 #include <future>
 #include <iomanip>
 
-//#define DEPTH_BUFFER
-#define STEREO_CAMERA
+#define DEPTH_BUFFER
+//#define STEREO_CAMERA
 #define CYAN_MAGENTA
 
 namespace studio

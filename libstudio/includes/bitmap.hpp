@@ -179,6 +179,10 @@ namespace studio
 		{
 		}
 
+		void fill(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) override
+		{
+		}
+
 		Render getRenderType() const override { return m_renderType; }
 		void setRenderType(Render renderType) { m_renderType = renderType; }
 
@@ -252,7 +256,15 @@ namespace studio
 		}
 
 		void floodLine(int y, int start, int stop, long double startDepth, long double stopDepth, unsigned int color);
-		void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) override;
+		void floodFill(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3, unsigned int color);
+		void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) override
+		{
+			floodFill(p1, p2, p3, 0x000000);
+		}
+		void fill(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) override
+		{
+			floodFill(p1, p2, p3, 0xFFFFFF);
+		}
 
 		inline math::Point tr(const math::Point& pt)
 		{

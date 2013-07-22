@@ -65,6 +65,11 @@ namespace studio
 			(leftEye ? m_leftEye : m_rightEye).flood(p1, p2, p3);
 		}
 
+		void fill(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3, bool leftEye) override
+		{
+			(leftEye ? m_leftEye : m_rightEye).fill(p1, p2, p3);
+		}
+
 		Render getRenderType(bool leftEye) const override
 		{
 			return (leftEye ? m_leftEye : m_rightEye).getRenderType();

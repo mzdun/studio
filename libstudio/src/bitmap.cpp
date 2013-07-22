@@ -67,16 +67,12 @@ namespace studio
 		{
 			auto z = (long double)x / dx;
 			if (isAbove(start + x, y, startDepth + dz * x / dx))
-				plot(start + x, y, 0x000000);
+				plot(start + x, y, color);
 		}
 	}
 
-	void GrayscaleDepthBitmap::flood(const PointWithDepth& _p1, const PointWithDepth& _p2, const PointWithDepth& _p3)
+	void GrayscaleDepthBitmap::floodFill(const PointWithDepth& _p1, const PointWithDepth& _p2, const PointWithDepth& _p3, unsigned int color)
 	{
-		unsigned long col = (unsigned char)(rand() * 64 / RAND_MAX + (256 - 64)/2);
-		col <<= 8;
-		col <<= 16;
-
 		PointWithDepth pts [] = { _p1, _p2, _p3 };
 		pts[0].m_pos = tr(pts[0].m_pos);
 		pts[1].m_pos = tr(pts[1].m_pos);
@@ -108,7 +104,7 @@ namespace studio
 				std::swap(z0, z1);
 			}
 
-			floodLine(y, (int) x0, (int) x1, z0, z1, col);
+			floodLine(y, (int) x0, (int) x1, z0, z1, color);
 		}
 
 		for (int y = y1; y < y2; y++)
@@ -123,7 +119,7 @@ namespace studio
 				std::swap(z0, z1);
 			}
 
-			floodLine(y, (int) x0, (int) x1, z0, z1, col);
+			floodLine(y, (int) x0, (int) x1, z0, z1, color);
 		}
 	}
 }
