@@ -98,11 +98,15 @@ namespace studio
 			m_canvas->line(points[1], points[2], vertices[1].z(), vertices[2].z());
 			break;
 		case Render::Solid:
-			m_canvas->fill(
-			{ points[0], vertices[0].z() },
-			{ points[1], vertices[1].z() },
-			{ points[2], vertices[2].z() }
-			);
+			{
+				UniformShader white(0xFFFFFF);
+				m_canvas->fill(
+				{ points[0], vertices[0].z() },
+				{ points[1], vertices[1].z() },
+				{ points[2], vertices[2].z() },
+				&white
+				);
+			}
 			break;
 		}
 	}

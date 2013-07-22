@@ -179,7 +179,7 @@ namespace studio
 		{
 		}
 
-		void fill(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) override
+		void fill(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3, Shader* shader) override
 		{
 		}
 
@@ -255,15 +255,16 @@ namespace studio
 				PlatformBitmap<BitmapType::G8>::blend(x, y, depth, brightness);
 		}
 
-		void floodLine(int y, int start, int stop, long double startDepth, long double stopDepth, unsigned int color);
-		void floodFill(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3, unsigned int color);
+		void floodLine(int y, int start, int stop, long double startDepth, long double stopDepth, Shader* shader);
+		void floodFill(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3, Shader* shader);
 		void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) override
 		{
-			floodFill(p1, p2, p3, 0x000000);
+			UniformShader black(0x000000);
+			floodFill(p1, p2, p3, &black);
 		}
-		void fill(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) override
+		void fill(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3, Shader* shader) override
 		{
-			floodFill(p1, p2, p3, 0xFFFFFF);
+			floodFill(p1, p2, p3, shader);
 		}
 
 		inline math::Point tr(const math::Point& pt)

@@ -58,7 +58,7 @@ namespace studio
 		}
 	};
 
-	void GrayscaleDepthBitmap::floodLine(int y, int start, int stop, long double startDepth, long double stopDepth, unsigned int color)
+	void GrayscaleDepthBitmap::floodLine(int y, int start, int stop, long double startDepth, long double stopDepth, Shader* shader)
 	{
 		auto dz = stopDepth - startDepth;
 		int dx = stop - start;
@@ -67,11 +67,11 @@ namespace studio
 		{
 			auto z = (long double)x / dx;
 			if (isAbove(start + x, y, startDepth + dz * x / dx))
-				plot(start + x, y, color);
+				plot(start + x, y, shader->shade({ (long double) start + x, (long double) y }));
 		}
 	}
 
-	void GrayscaleDepthBitmap::floodFill(const PointWithDepth& _p1, const PointWithDepth& _p2, const PointWithDepth& _p3, unsigned int color)
+	void GrayscaleDepthBitmap::floodFill(const PointWithDepth& _p1, const PointWithDepth& _p2, const PointWithDepth& _p3, Shader* shader)
 	{
 		PointWithDepth pts [] = { _p1, _p2, _p3 };
 		pts[0].m_pos = tr(pts[0].m_pos);
@@ -104,7 +104,7 @@ namespace studio
 				std::swap(z0, z1);
 			}
 
-			floodLine(y, (int) x0, (int) x1, z0, z1, color);
+			floodLine(y, (int) x0, (int) x1, z0, z1, shader);
 		}
 
 		for (int y = y1; y < y2; y++)
@@ -119,7 +119,7 @@ namespace studio
 				std::swap(z0, z1);
 			}
 
-			floodLine(y, (int) x0, (int) x1, z0, z1, color);
+			floodLine(y, (int) x0, (int) x1, z0, z1, shader);
 		}
 	}
 }
