@@ -246,7 +246,7 @@ namespace studio
 			}
 
 			long double * ptr = m_depth + y * m_width + x;
-			if (*ptr >= depth)
+			if (*ptr > depth)
 			{
 				*ptr = depth;
 				if (m_minSet > depth) m_minSet = depth;

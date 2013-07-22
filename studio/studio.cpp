@@ -143,6 +143,8 @@ void setUp(std::shared_ptr<Scene>& scene)
 	scene->add<Block>(2015, 1235, 1);
 	scene->add<Block>(2015, 1, 1060)->translate(0,    0,  -1060);
 	scene->add<Block>(2015, 1, 1060)->translate(0, 1235,  -1060);
+	scene->add<Block>(1, 1235, 1060)->translate(-1, 0, -1060);
+	scene->add<Block>(1, 1235, 1060)->translate(2016, 0, -1060);
 
 	scene->add<Block>(425, 300, 210)->translate(1365, 0,   -210);
 	scene->add<Block>(425, 300, 210)->translate(940,  0,   -210);
@@ -162,9 +164,10 @@ void setUp(std::shared_ptr<Scene>& scene)
 
 void lights(const std::shared_ptr<studio::Scene>& scene)
 {
-	math::Vertex lightPos { 1007.5, 617.5, -1000 }; //same as camera's
+	math::Vertex lightPos { 1007.5, 1030, -1000 }; //same as camera's
 
-	scene->add<studio::SimpleLight>(lightPos);
+	scene->add<studio::SimpleLight>(lightPos + math::Vertex(800, 0, 0));
+	scene->add<studio::SimpleLight>(lightPos + math::Vertex(-800, 0, 0));
 }
 
 template <typename CanvasT>

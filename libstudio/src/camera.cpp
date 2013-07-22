@@ -117,11 +117,7 @@ namespace studio
 
 				UniformShader white(color | (color << 8) | (color << 16) | (color << 24));
 #else
-				auto int0 = info.getIntensity(vertices[0]);
-				auto int1 = info.getIntensity(vertices[1]);
-				auto int2 = info.getIntensity(vertices[2]);
-
-				LinearShader white(0xFFFFFF, points[0], points[1], points[2], int0, int1, int2);
+				LightsShader white(0xFFFFFF, std::move(info), points[0], points[1], points[2], vertices[0], vertices[1], vertices[2]);
 #endif
 				m_canvas->fill(
 				{ points[0], vertices[0].z() },

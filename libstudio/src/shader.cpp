@@ -29,41 +29,44 @@
 
 namespace studio
 {
-	LinearShader::LinearShader(unsigned int color, const math::Point& p0, const math::Point& p1, const math::Point& p2, long double int0, long double int1, long double int2)
+	LightsShader::LightsShader(unsigned int color, LightsInfo && info, const math::Point& p0, const math::Point& p1, const math::Point& p2, const math::Vertex& v0, const math::Vertex& v1, const math::Vertex& v2)
 		: m_color(color)
+		, m_info(std::move(info))
 	{
-		m_func[0] = ShadedPoint(p0, int0);
-		m_func[1] = ShadedPoint(p1, int1);
-		m_func[2] = ShadedPoint(p2, int2);
-		std::sort(m_func, m_func + 3, [](const ShadedPoint& lhs, const ShadedPoint& rhs) { return lhs.y > rhs.y; });
+		m_func[0] = ProjectedPoint(p0, v0);
+		m_func[1] = ProjectedPoint(p1, v1);
+		m_func[2] = ProjectedPoint(p2, v2);
+		std::sort(m_func, m_func + 3, [](const ProjectedPoint& lhs, const ProjectedPoint& rhs) { return lhs.y > rhs.y; });
 
 		A = Delta(m_func[0], m_func[2]);
 		B = Delta(m_func[0], m_func[1]);
 		C = Delta(m_func[1], m_func[2]);
 	}
 
-	long double LinearShader::interpolate(const math::Point& pt)
+	math::Vertex LightsShader::counterProject(const math::Point& pt)
 	{
-		long double x0, x1, int0, int1;
-		std::tie(x0, int0) = B.interpolate(pt.y(), m_func[0]);
+		ProjectedPoint p1, p2;
+		p1 = A.interpolate(pt.y(), m_func[0]);
 
 		if (pt.y() > m_func[1].y)
 		{
 			// the point is in the upper "half"
-			std::tie(x1, int1) = B.interpolate(pt.y(), m_func[0]);
+			p2 = B.interpolate(pt.y(), m_func[0]);
 		}
 		else
 		{
 			// the point is in the lower "half"
-			std::tie(x1, int1) = C.interpolate(pt.y(), m_func[1]);
+			p2 = C.interpolate(pt.y(), m_func[1]);
 		}
 
-		return (pt.x() - x0) * (int1 - int0) / (x1 - x0);
+		auto p = Delta(p1, p2).interpolate(p1, pt.x());
+
+		return {p.x3, p.y3, p.z3};
 	}
 
-	unsigned char LinearShader::shade(const math::Point& pt)
+	unsigned char LightsShader::shade(const math::Point& pt)
 	{
-		auto intensity = interpolate(pt);
+		auto intensity = m_info.getIntensity(counterProject(pt));
 
 		// BW only...
 		auto R = (unsigned char) (m_color & 0xFF);

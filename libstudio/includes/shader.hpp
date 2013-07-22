@@ -26,6 +26,7 @@
 #define __LIBSTUDIO_SHADER_HPP__
 
 #include "fundamentals.hpp"
+#include "light.hpp"
 
 namespace studio
 {
@@ -49,50 +50,76 @@ namespace studio
 		}
 	};
 
-	class LinearShader : public Shader
+	class LightsShader : public Shader
 	{
 		unsigned int m_color;
+		LightsInfo m_info;
 
-		struct ShadedPoint
+		struct ProjectedPoint
 		{
 			long double x;
 			long double y;
-			long double intensity;
-			ShadedPoint() {}
-			ShadedPoint(const math::Point& pt, long double intensity)
-				: x(pt.x())
-				, y(pt.y())
-				, intensity(intensity)
+
+			long double x3;
+			long double y3;
+			long double z3;
+
+			ProjectedPoint() {}
+			ProjectedPoint(const math::Point& p, const math::Vertex& v)
+				: x(p.x())
+				, y(p.y())
+				, x3(v.x())
+				, y3(v.y())
+				, z3(v.z())
 			{
 			}
+			ProjectedPoint(long double x, long double y, long double x3, long double y3, long double z3)
+				: x(x)
+				, y(y)
+				, x3(x3)
+				, y3(y3)
+				, z3(z3)
+			{}
 		};
 
 		struct Delta
 		{
 			long double dx;
 			long double dy;
-			long double dInt;
+
+			long double dx3;
+			long double dy3;
+			long double dz3;
+
 			Delta() {}
-			Delta(const ShadedPoint& p0, const ShadedPoint& p1)
+			Delta(const ProjectedPoint& p0, const ProjectedPoint& p1)
 				: dx(p1.x - p0.x)
 				, dy(p1.y - p0.y)
-				, dInt(p1.intensity - p0.intensity)
+				, dx3(p1.x3 - p0.x3)
+				, dy3(p1.y3 - p0.y3)
+				, dz3(p1.z3 - p0.z3)
 			{
 			}
 
-			std::pair<long double, long double> interpolate(long double y, const ShadedPoint& pt)
+			ProjectedPoint interpolate(long double y, const ProjectedPoint& pt)
 			{
 				auto step = (y - pt.y) / dy;
-				return std::make_pair(pt.x + step * dx, pt.intensity + step * dInt);
+				return { pt.x + step * dx, y, pt.x3 + step * dx3, pt.y3 + step * dy3, pt.z3 + step * dz3 };
+			}
+
+			ProjectedPoint interpolate(const ProjectedPoint& pt, long double x)
+			{
+				auto step = (x - pt.x) / dx;
+				return { x, pt.y + step * dy, pt.x3 + step * dx3, pt.y3 + step * dy3, pt.z3 + step * dz3 };
 			}
 		};
 
-		ShadedPoint m_func[3];
+		ProjectedPoint m_func[3];
 		Delta A, B, C;
 
-		long double interpolate(const math::Point& pt);
+		math::Vertex counterProject(const math::Point& pt);
 	public:
-		LinearShader(unsigned int color, const math::Point& p0, const math::Point& p1, const math::Point& p2, long double int0, long double int1, long double int2);
+		LightsShader(unsigned int color, LightsInfo && info, const math::Point& p0, const math::Point& p1, const math::Point& p2, const math::Vertex& v0, const math::Vertex& v1, const math::Vertex& v2);
 		unsigned char shade(const math::Point& pt) override;
 	};
 }
