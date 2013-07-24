@@ -29,8 +29,8 @@
 
 namespace studio
 {
-	LightsShader::LightsShader(unsigned int color, LightsInfo && info, const math::Point& p0, const math::Point& p1, const math::Point& p2, const math::Vertex& v0, const math::Vertex& v1, const math::Vertex& v2)
-		: m_color(color)
+	LightsShader::LightsShader(const MaterialPtr& material, LightsInfo && info, const math::Point& p0, const math::Point& p1, const math::Point& p2, const math::Vertex& v0, const math::Vertex& v1, const math::Vertex& v2)
+		: m_material(material)
 		, m_info(std::move(info))
 	{
 		m_func[0] = ProjectedPoint(p0, v0);
@@ -69,8 +69,9 @@ namespace studio
 		auto intensity = m_info.getIntensity(counterProject(pt));
 
 		// BW only...
-		auto R = (unsigned char) (m_color & 0xFF);
-		auto color = cast<unsigned int>(R * intensity);
+		unsigned int color = m_material ? m_material->color() : 0xFFFFFF;
+		auto R = (unsigned char) (color & 0xFF);
+		color = cast<unsigned int>(R * intensity);
 		return color | (color << 8) | (color << 16) | (color << 24);
 	}
 }

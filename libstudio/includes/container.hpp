@@ -36,6 +36,8 @@ namespace studio
 		typedef std::shared_vector<Renderable> Renderables;
 		Renderables m_children;
 	public:
+		typedef Renderables::const_iterator const_iterator;
+
 		template <typename T, typename... Args>
 		std::shared_ptr<T> add(Args && ... args)
 		{
@@ -48,6 +50,10 @@ namespace studio
 			for (auto && child : m_children)
 				child->renderTo(cam, accumulated, lights);
 		}
+		MaterialPtr material() const { return nullptr; }
+
+		const_iterator begin() const { return m_children.begin(); }
+		const_iterator end() const { return m_children.end(); }
 	};
 }
 

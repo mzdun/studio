@@ -46,4 +46,10 @@ namespace studio
 		make_rect(this, h, d, a, e);
 		make_rect(this, e, a, b, f);
 	}
+
+	void Block::setMaterialForSide(int side, const MaterialPtr& material)
+	{
+		((Triangle*) m_children[side * 2].get())->setMaterial(material);
+		((Triangle*) m_children[side * 2 + 1].get())->setMaterial(material);
+	}
 }

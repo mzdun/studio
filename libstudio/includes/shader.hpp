@@ -27,6 +27,7 @@
 
 #include "fundamentals.hpp"
 #include "light.hpp"
+#include "material.hpp"
 
 namespace studio
 {
@@ -52,7 +53,7 @@ namespace studio
 
 	class LightsShader : public Shader
 	{
-		unsigned int m_color;
+		MaterialPtr m_material;
 		LightsInfo m_info;
 
 		struct ProjectedPoint
@@ -121,7 +122,7 @@ namespace studio
 
 		math::Vertex counterProject(const math::Point& pt);
 	public:
-		LightsShader(unsigned int color, LightsInfo && info, const math::Point& p0, const math::Point& p1, const math::Point& p2, const math::Vertex& v0, const math::Vertex& v1, const math::Vertex& v2);
+		LightsShader(const MaterialPtr& material, LightsInfo && info, const math::Point& p0, const math::Point& p1, const math::Point& p2, const math::Vertex& v0, const math::Vertex& v1, const math::Vertex& v2);
 		unsigned char shade(const math::Point& pt) override;
 	};
 }

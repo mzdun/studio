@@ -33,6 +33,7 @@ namespace studio
 	{
 	public:
 		Block(const fixed& width, const fixed& height, const fixed& depth);
+		void setMaterialForSide(int, const MaterialPtr&);
 	};
 }
 

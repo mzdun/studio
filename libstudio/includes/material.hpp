@@ -22,30 +22,32 @@
 * SOFTWARE.
 */
 
-#ifndef __LIBSTUDIO_TRIANGLE_HPP__
-#define __LIBSTUDIO_TRIANGLE_HPP__
+#ifndef __LIBSTUDIO_MATERIAL_HPP__
+#define __LIBSTUDIO_MATERIAL_HPP__
 
-#include "renderable.hpp"
+#include "fundamentals.hpp"
+#include "shared_vector.hpp"
 
 namespace studio
 {
-	class Triangle : public Renderable
+	struct Material
 	{
+		virtual ~Material() {}
+		virtual unsigned int color(/* position on the surface... */) const = 0;
+	};
+
+	typedef std::shared_ptr<Material> MaterialPtr;
+
+	class SimpleMaterial : public Material
+	{
+		unsigned int m_color;
 	public:
-		typedef math::Vertex vertices_t[3];
+		SimpleMaterial(unsigned int color)
+			: m_color(color)
+		{}
 
-		Triangle(const math::Vertex& v1, const math::Vertex& v2, const math::Vertex& v3);
-		void renderTo(const ICamera* cam, const math::Matrix& parent, const Lights& lights) const override;
-		MaterialPtr material() const override { return m_material; }
-
-		const vertices_t& vertices() const { return m_vertices; }
-		math::Vector normal() const { return math::Vector::crossProduct(m_vertices[2] - m_vertices[1], m_vertices[0] - m_vertices[1]); }
-
-		void setMaterial(const MaterialPtr& material) { m_material = material; }
-	private:
-		vertices_t m_vertices;
-		MaterialPtr m_material;
+		unsigned int color(/* position on the surface... */) const override { return m_color; }
 	};
 }
 
-#endif //__LIBSTUDIO_TRIANGLE_HPP__
+#endif //__LIBSTUDIO_MATERIAL_HPP__

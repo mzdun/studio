@@ -117,7 +117,7 @@ namespace studio
 
 				UniformShader white(color | (color << 8) | (color << 16) | (color << 24));
 #else
-				LightsShader white(0xFFFFFF, std::move(info), points[0], points[1], points[2], vertices[0], vertices[1], vertices[2]);
+				LightsShader white(triangle->material(), std::move(info), points[0], points[1], points[2], vertices[0], vertices[1], vertices[2]);
 #endif
 				m_canvas->fill(
 				{ points[0], vertices[0].z() },

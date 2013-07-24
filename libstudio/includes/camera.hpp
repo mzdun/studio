@@ -38,6 +38,7 @@ namespace studio
 		virtual void render(const Triangle*, const math::Matrix&, const Lights& lights) const = 0;
 		virtual void renderLine(const math::Vertex& start, const math::Vertex& stop, const Lights& lights) const = 0;
 		void renderTo(const ICamera* cam, const math::Matrix& parent, const Lights& lights) const override {}
+		MaterialPtr material() const override { return nullptr; }
 	};
 
 	class Camera : public ICamera

@@ -138,13 +138,28 @@ int main(int argc, char* argv[])
 
 using namespace studio;
 
+template <typename It>
+class range_t
+{
+	It _begin;
+	It _end;
+public:
+	typedef It iterator;
+	range_t(It b, It e) : _begin(b), _end(e) {}
+	iterator begin() { return _begin; }
+	iterator end() { return _end; }
+};
+
+template <typename It>
+range_t<It> make_range(It from, It to) { return { from, to }; }
+
 void setUp(std::shared_ptr<Scene>& scene)
 {
 	scene->add<Block>(2015, 1235, 1);
 	scene->add<Block>(2015, 1, 1060)->translate(0,    0,  -1060);
 	scene->add<Block>(2015, 1, 1060)->translate(0, 1235,  -1060);
-	scene->add<Block>(1, 1235, 1060)->translate(-1, 0, -1060);
-	scene->add<Block>(1, 1235, 1060)->translate(2016, 0, -1060);
+	/*scene->add<Block>(1, 1235, 1060)->translate(-1, 0, -1060);
+	scene->add<Block>(1, 1235, 1060)->translate(2016, 0, -1060);*/
 
 	scene->add<Block>(425, 300, 210)->translate(1365, 0,   -210);
 	scene->add<Block>(425, 300, 210)->translate(940,  0,   -210);
@@ -160,14 +175,35 @@ void setUp(std::shared_ptr<Scene>& scene)
 	scene->add<Block>(225, 780, 160)->translate(185,  400, -160);
 
 	scene->add<Block>(577, 352, 48)->translate(700, 545, -96);
+
+	auto wall = ((studio::Block*)scene->begin()->get());
+	auto wall_color = std::make_shared<studio::SimpleMaterial>(0xfffde6);
+	for (int i = 0; i < 6; ++i)
+		wall->setMaterialForSide(i, wall_color);
+
+	auto tv = ((studio::Block*)(scene->end() - 1)->get());
+	auto tv_color = std::make_shared<studio::SimpleMaterial>(0x111111);
+	for (int i = 0; i < 6; ++i)
+		tv->setMaterialForSide(i, tv_color);
+
+	auto side_color = std::make_shared<studio::SimpleMaterial>(0xa0a0a0);// 0xffffa0);
+	auto front_color = std::make_shared<studio::SimpleMaterial>(0x868686);// 0x261305);
+
+	for (auto && solid : make_range(scene->begin() + 3, scene->end() - 1))
+	{
+		auto block = ((studio::Block*)solid.get());
+		for (int i = 1; i < 6; ++i)
+			block->setMaterialForSide(i, side_color);
+		block->setMaterialForSide(0, front_color);
+	}
 }
 
 void lights(const std::shared_ptr<studio::Scene>& scene)
 {
 	math::Vertex lightPos { fixed(1007.5), 1030, -1000 }; //same as camera's
 
-	scene->add<studio::SimpleLight>(lightPos + math::Vertex(800, 0, 0), 100);
-	scene->add<studio::SimpleLight>(lightPos + math::Vertex(-800, 0, 0), 100);
+	scene->add<studio::SimpleLight>(lightPos + math::Vertex(800, 0, 0), 200);
+	scene->add<studio::SimpleLight>(lightPos + math::Vertex(-800, 0, 0), 200);
 }
 
 template <typename CanvasT>
