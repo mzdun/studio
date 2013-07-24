@@ -64,14 +64,19 @@ namespace studio
 		return {p.x3, p.y3, p.z3};
 	}
 
-	unsigned char LightsShader::shade(const math::Point& pt)
+	unsigned int LightsShader::shade(const math::Point& pt)
 	{
 		auto intensity = m_info.getIntensity(counterProject(pt));
 
 		// BW only...
 		unsigned int color = m_material ? m_material->color() : 0xFFFFFF;
-		auto R = (unsigned char) (color & 0xFF);
-		color = cast<unsigned int>(R * intensity);
-		return color | (color << 8) | (color << 16) | (color << 24);
+		unsigned short B = cast<unsigned short>((unsigned char) (color & 0xFF) * intensity);
+		unsigned short G = cast<unsigned short>((unsigned char) ((color >> 8) & 0xFF) * intensity);
+		unsigned short R = cast<unsigned short>((unsigned char) ((color >> 16) & 0xFF) * intensity);
+		if (B > 0xFF) B = 0xFF;
+		if (G > 0xFF) G = 0xFF;
+		if (R > 0xFF) R = 0xFF;
+		color = (R << 16) | (G << 8) | R;
+		return color;
 	}
 }

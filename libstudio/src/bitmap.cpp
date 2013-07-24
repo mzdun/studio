@@ -121,4 +121,68 @@ namespace studio
 			floodLine(y, cast<int>(x0), cast<int>(x1), z0, z1, shader);
 		}
 	}
+
+	void ColorDepthBitmap::floodLine(int y, int start, int stop, const fixed& startDepth, const fixed& stopDepth, Shader* shader)
+	{
+		auto dz = stopDepth - startDepth;
+		int dx = stop - start;
+
+		for (int x = 0; x < dx; x++)
+		{
+			if (isAbove(start + x, y, startDepth + dz * fixed(x) / fixed(dx)))
+				plot(start + x, y, shader->shade(revTr({ fixed(start + x), fixed(y) })));
+		}
+	}
+
+	void ColorDepthBitmap::floodFill(const PointWithDepth& _p1, const PointWithDepth& _p2, const PointWithDepth& _p3, Shader* shader)
+	{
+		PointWithDepth pts [] = { _p1, _p2, _p3 };
+		pts[0].m_pos = tr(pts[0].m_pos);
+		pts[1].m_pos = tr(pts[1].m_pos);
+		pts[2].m_pos = tr(pts[2].m_pos);
+
+		std::sort(pts, pts + 3, [](const PointWithDepth& lhs, const PointWithDepth& rhs) { return lhs.m_pos.y() < rhs.m_pos.y(); });
+
+		Slope A(pts[0].m_pos.y(), pts[1].m_pos.y(), pts[0].m_pos.x(), pts[1].m_pos.x(), pts[0].m_depth, pts[1].m_depth);
+		Slope B(pts[0].m_pos.y(), pts[2].m_pos.y(), pts[0].m_pos.x(), pts[2].m_pos.x(), pts[0].m_depth, pts[2].m_depth);
+		Slope C(pts[1].m_pos.y(), pts[2].m_pos.y(), pts[1].m_pos.x(), pts[2].m_pos.x(), pts[1].m_depth, pts[2].m_depth);
+
+		int y0 = cast<int>(pts[0].m_pos.y() + 1);
+		int y1 = cast<int>(pts[1].m_pos.y() + 1);
+		int y2 = cast<int>(pts[2].m_pos.y() + 1);
+
+		for (int y = y0; y < y1; y++)
+		{
+			fixed x0, x1, z0, z1;
+			B.calc(y, x0, z0);
+			A.calc(y, x1, z1);
+
+			if (!(y % 10))
+			{
+			}
+
+			if (x0 > x1)
+			{
+				std::swap(x0, x1);
+				std::swap(z0, z1);
+			}
+
+			floodLine(y, cast<int>(x0), cast<int>(x1), z0, z1, shader);
+		}
+
+		for (int y = y1; y < y2; y++)
+		{
+			fixed x0, x1, z0, z1;
+			B.calc(y, x0, z0);
+			C.calc(y, x1, z1);
+
+			if (x0 > x1)
+			{
+				std::swap(x0, x1);
+				std::swap(z0, z1);
+			}
+
+			floodLine(y, cast<int>(x0), cast<int>(x1), z0, z1, shader);
+		}
+	}
 }

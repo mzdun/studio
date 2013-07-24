@@ -62,7 +62,7 @@ namespace studio
 
 		unsigned char* getDst(int x, int y)
 		{
-			return (unsigned char*) m_pixels + (m_height - y) * stride() + x * (BPP >> 3);
+			return (unsigned char*) m_pixels + (m_height - y - 1) * stride() + x * (BPP >> 3);
 		}
 
 		void blend(int x, int y, unsigned int color, const fixed& brightness)
@@ -210,20 +210,19 @@ namespace studio
 		}
 	};
 
-	struct GrayscaleDepthBitmap : public CanvasImpl<GrayscaleDepthBitmap>, public PlatformBitmap<BitmapType::G8>
+	template <typename T>
+	class DepthMap
 	{
 		fixed* m_depth;
 		fixed m_minSet;
 		fixed m_maxSet;
 
-		GrayscaleDepthBitmap(int w, int h)
-			: PlatformBitmap<BitmapType::G8>(w, h)
-			, m_depth(new fixed [w*h])
+	public:
+		DepthMap(int w, int h)
+			: m_depth(new fixed[w*h])
 			, m_minSet(std::numeric_limits<long double>::max())
 			, m_maxSet(std::numeric_limits<long double>::min())
 		{
-			erase();
-
 			fixed* ptr = m_depth;
 			fixed* end = m_depth + w*h;
 			while (ptr != end)
@@ -232,20 +231,20 @@ namespace studio
 			}
 		}
 
-		~GrayscaleDepthBitmap()
+		~DepthMap()
 		{
 			delete [] m_depth;
 		}
 
 		bool isAbove(int x, int y, const fixed& depth)
 		{
-			if (x < 0 || x >= m_width ||
-				y < 0 || y >= m_height)
+			if (x < 0 || x >= static_cast<T*>(this)->m_width ||
+				y < 0 || y >= static_cast<T*>(this)->m_height)
 			{
 				return true;
 			}
 
-			fixed * ptr = m_depth + y * m_width + x;
+			fixed * ptr = static_cast<T*>(this)->m_depth + y * static_cast<T*>(this)->m_width + x;
 			if (*ptr > depth)
 			{
 				*ptr = depth;
@@ -254,6 +253,37 @@ namespace studio
 				return true;
 			}
 			return false;
+		}
+
+		void saveDepths(const char* path)
+		{
+			PlatformBitmap<BitmapType::G8> depths(static_cast<T*>(this)->m_width, static_cast<T*>(this)->m_height);
+			depths.erase();
+
+			auto dz = m_maxSet - m_minSet;
+			for (int y = 0; y < static_cast<T*>(this)->m_height; ++y)
+			{
+				auto line = m_depth + y * static_cast<T*>(this)->m_width;
+				for (int x = 0; x < static_cast<T*>(this)->m_width; ++x)
+				{
+					auto z = *line++;
+					if (z > m_maxSet || z < m_minSet)
+						continue;
+
+					depths.plot(x, y, cast<unsigned char>(0x40 + (m_maxSet - z)*(255 - 0x40) / dz));
+				}
+			}
+			depths.save(path);
+		}
+	};
+
+	struct GrayscaleDepthBitmap : public CanvasImpl<GrayscaleDepthBitmap>, public DepthMap<GrayscaleDepthBitmap>, public PlatformBitmap<BitmapType::G8>
+	{
+		GrayscaleDepthBitmap(int w, int h)
+			: PlatformBitmap<BitmapType::G8>(w, h)
+			, DepthMap<GrayscaleDepthBitmap>(w, h)
+		{
+			erase();
 		}
 		void blend(int x, int y, const fixed& depth, const fixed& brightness)
 		{
@@ -272,32 +302,6 @@ namespace studio
 		{
 			floodFill(p1, p2, p3, shader);
 		}
-
-		inline math::Point tr(const math::Point& pt)
-		{
-			return { pt.x() + m_width / 2, -pt.y() + m_height / 2 };
-		}
-
-		void saveDepths(const char* path)
-		{
-			PlatformBitmap<BitmapType::G8> depths(m_width, m_height);
-			depths.erase();
-
-			auto dz = m_maxSet - m_minSet;
-			for (int y = 0; y < m_height; ++y)
-			{
-				auto line = m_depth + y * m_width;
-				for (int x = 0; x < m_width; ++x)
-				{
-					auto z = *line++;
-					if (z > m_maxSet || z < m_minSet)
-						continue;
-
-					depths.plot(x, y, cast<unsigned char>(0x40 + (m_maxSet - z)*(255 - 0x40) / dz));
-				}
-			}
-			depths.save(path);
-		}
 	};
 
 	struct ColorBitmap : public CanvasImpl<ColorBitmap>, public PlatformBitmap<BitmapType::RGB24>
@@ -306,6 +310,33 @@ namespace studio
 			: PlatformBitmap<BitmapType::RGB24>(w, h)
 		{
 			erase();
+		}
+	};
+
+	struct ColorDepthBitmap : public CanvasImpl<ColorDepthBitmap>, public DepthMap<ColorDepthBitmap>, public PlatformBitmap<BitmapType::RGB24>
+	{
+		ColorDepthBitmap(int w, int h)
+			: PlatformBitmap<BitmapType::RGB24>(w, h)
+			, DepthMap<ColorDepthBitmap>(w, h)
+		{
+			erase();
+		}
+		void blend(int x, int y, const fixed& depth, const fixed& brightness)
+		{
+			if (isAbove(x, y, depth))
+				PlatformBitmap<BitmapType::RGB24>::blend(x, y, depth, brightness);
+		}
+
+		void floodLine(int y, int start, int stop, const fixed& startDepth, const fixed& stopDepth, Shader* shader);
+		void floodFill(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3, Shader* shader);
+		void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) override
+		{
+			UniformShader black(0x000000);
+			floodFill(p1, p2, p3, &black);
+		}
+		void fill(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3, Shader* shader) override
+		{
+			floodFill(p1, p2, p3, shader);
 		}
 	};
 }

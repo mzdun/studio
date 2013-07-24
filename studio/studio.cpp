@@ -46,7 +46,11 @@
 namespace studio
 {
 #ifdef DEPTH_BUFFER
+#  ifdef STEREO_CAMERA
 	typedef GrayscaleDepthBitmap BasicBitmap;
+#  else
+	typedef ColorDepthBitmap BasicBitmap;
+#  endif
 #else
 	typedef GrayscaleBitmap BasicBitmap;
 #endif
@@ -186,8 +190,8 @@ void setUp(std::shared_ptr<Scene>& scene)
 	for (int i = 0; i < 6; ++i)
 		tv->setMaterialForSide(i, tv_color);
 
-	auto side_color = std::make_shared<studio::SimpleMaterial>(0xa0a0a0);// 0xffffa0);
-	auto front_color = std::make_shared<studio::SimpleMaterial>(0x868686);// 0x261305);
+	auto side_color = std::make_shared<studio::SimpleMaterial>(0xffffa0);
+	auto front_color = std::make_shared<studio::SimpleMaterial>(0x051326);
 
 	for (auto && solid : make_range(scene->begin() + 3, scene->end() - 1))
 	{
