@@ -106,7 +106,7 @@ namespace studio
 				{
 					auto pos = light->position();
 					transform(pos, math::Matrix::identity());
-					info.m_lights.push_back(pos);
+					info.m_lights.emplace_back(pos, light->power());
 				}
 
 #if 0

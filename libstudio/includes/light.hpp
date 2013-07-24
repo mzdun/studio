@@ -34,6 +34,7 @@ namespace studio
 	{
 		virtual ~Light() {}
 		virtual const math::Vertex& position() const = 0;
+		virtual fixed power() const = 0;
 	};
 
 	typedef std::shared_ptr<Light> LightPtr;
@@ -42,17 +43,30 @@ namespace studio
 	class SimpleLight : public Light
 	{
 		math::Vertex m_position;
+		fixed m_power;
 	public:
-		SimpleLight(const math::Vertex& position)
+		SimpleLight(const math::Vertex& position, const fixed& power)
 			: m_position(position)
+			, m_power(power)
 		{}
 
 		const math::Vertex& position() const override { return m_position; }
+		fixed power() const override { return m_power;  }
 	};
 
+	struct LightInfo
+	{
+		math::Vertex position;
+		fixed power;
+		explicit LightInfo(const math::Vertex& position, const fixed& power)
+			: position(position)
+			, power(power / 100)
+		{
+		}
+	};
 	struct LightsInfo
 	{
-		std::vector<math::Vertex> m_lights;
+		std::vector<LightInfo> m_lights;
 		math::Vector m_normal;
 
 		fixed getIntensity(const math::Vertex& point) const
@@ -63,12 +77,16 @@ namespace studio
 				intensity = 0;
 				for (auto && light : m_lights)
 				{
-					intensity += 1 - math::Vector::cosTheta(m_normal, point - light);
+					auto v = point - light.position;
+					fixed lengthSq = v.lengthSquared() / 1000000;
+					//if (lengthSq > 1)
+					//	lengthSq = 1;
+					intensity += 1 - math::Vector::cosTheta(m_normal, v) * light.power / lengthSq;
 				}
 				intensity /= 2;
 				intensity /= m_lights.size();
 			}
-			return intensity;
+			return intensity > 1 ? 1 : intensity;
 		}
 	};
 }

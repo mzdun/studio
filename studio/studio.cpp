@@ -166,8 +166,8 @@ void lights(const std::shared_ptr<studio::Scene>& scene)
 {
 	math::Vertex lightPos { fixed(1007.5), 1030, -1000 }; //same as camera's
 
-	scene->add<studio::SimpleLight>(lightPos + math::Vertex(800, 0, 0));
-	scene->add<studio::SimpleLight>(lightPos + math::Vertex(-800, 0, 0));
+	scene->add<studio::SimpleLight>(lightPos + math::Vertex(800, 0, 0), 100);
+	scene->add<studio::SimpleLight>(lightPos + math::Vertex(-800, 0, 0), 100);
 }
 
 template <typename CanvasT>
