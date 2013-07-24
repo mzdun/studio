@@ -32,13 +32,13 @@ namespace studio
 		fixed Vector::cosTheta(const Vector& lhs, const Vector& rhs)
 		{
 			auto scalar = dotProduct(lhs, rhs);
-			if (__abs(scalar) < fixed(0.00001))
-				return fixed();
+			if (!scalar)
+				return 0;
 
 			auto magnitudes = lhs.length() * rhs.length();
 
-			if (__abs(scalar) < fixed(0.00001))
-				return fixed(1);
+			if (!magnitudes)
+				return 1;
 
 			return scalar / magnitudes;
 		}

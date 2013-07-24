@@ -103,12 +103,14 @@ namespace studio
 
 			ProjectedPoint interpolate(const fixed& y, const ProjectedPoint& pt)
 			{
+				if (!dy) return pt;
 				auto step = (y - pt.y) / dy;
 				return { pt.x + step * dx, y, pt.x3 + step * dx3, pt.y3 + step * dy3, pt.z3 + step * dz3 };
 			}
 
 			ProjectedPoint interpolate(const ProjectedPoint& pt, const fixed& x)
 			{
+				if (!dx) return pt;
 				auto step = (x - pt.x) / dx;
 				return { x, pt.y + step * dy, pt.x3 + step * dx3, pt.y3 + step * dy3, pt.z3 + step * dz3 };
 			}

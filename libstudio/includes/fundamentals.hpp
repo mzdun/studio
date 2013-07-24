@@ -26,13 +26,15 @@
 #define __LIBSTUDIO_FUNDAMENTALS_HPP__
 
 #include <cmath>
+#include <iostream>
+#include <iomanip>
 
 namespace studio
 {
 	namespace math
 	{
 		static const long double PI = 3.14159265358979323846264338327950288419716939937510L;
-
+#if 1
 #define PROXY_OP_M(op) \
 	fixed& operator op(const fixed& rhs) { v op rhs.v; return *this; } \
 	fixed& operator op(long double rhs) { v op rhs; return *this; } \
@@ -74,12 +76,18 @@ namespace studio
 
 		struct fixed
 		{
-			float v;
+			inline fixed __abs() const
+			{
+				if (v < 0) return -*this;
+				return *this;
+			}
+
+			long double v;
 			fixed(): v(0) {}
 			fixed(fixed && rhs) : v(rhs.v) { }
-			fixed(long long v) : v(v) {}
+			fixed(long long v) : v((decltype(this->v)) v) {}
 			fixed(int v) : v(v) {}
-			fixed(unsigned long long v) : v(v) {}
+			fixed(unsigned long long v) : v((decltype(this->v)) v) {}
 			fixed(unsigned int v) : v(v) {}
 
 			explicit fixed(long double v) : v(v) {}
@@ -88,9 +96,9 @@ namespace studio
 
 			fixed& operator = (fixed && rhs) { v = rhs.v; return *this; }
 			fixed& operator = (const fixed& rhs) { v = rhs.v; return *this; }
-			fixed& operator = (long long rhs) { v = rhs; return *this; }
+			fixed& operator = (long long rhs) { v = (decltype(this->v)) rhs; return *this; }
 			fixed& operator = (int rhs) { v = rhs; return *this; }
-			fixed& operator = (unsigned long long rhs) { v = rhs; return *this; }
+			fixed& operator = (unsigned long long rhs) { v = (decltype(this->v)) rhs; return *this; }
 			fixed& operator = (unsigned int rhs) { v = rhs; return *this; }
 
 			PROXY_OP_M( += );
@@ -99,6 +107,7 @@ namespace studio
 			PROXY_OP_M( /= );
 			PROXY_OP_UNARY(-);
 			PROXY_OP_UNARY(+);
+			bool operator ! () const { return __abs().v < 0.00001; }
 		private:
 		};
 
@@ -116,8 +125,7 @@ namespace studio
 
 		inline fixed __abs(const fixed& ld)
 		{
-			if (ld.v < 0) return fixed{ -ld.v };
-			return ld;
+			return ld.__abs();
 		}
 
 		inline fixed sin(const fixed& v) { return fixed(std::sin(v.v)); }
@@ -126,6 +134,238 @@ namespace studio
 
 		template <typename T>
 		inline T cast(const fixed& v) { return (T)v.v; }
+#else
+#define PROXY_OP_M(op) \
+	fixed& operator op(long double rhs) { return *this op fixed(rhs); } \
+	fixed& operator op(double rhs) { return *this op fixed(rhs); } \
+	fixed& operator op(float rhs) { return *this op fixed(rhs); } \
+	fixed& operator op(long long rhs) { return *this op fixed(rhs); } \
+	fixed& operator op(long rhs) { return *this op fixed(rhs); } \
+	fixed& operator op(int rhs) { return *this op fixed(rhs); } \
+	fixed& operator op(unsigned long long rhs) { return *this op fixed(rhs); } \
+	fixed& operator op(unsigned long rhs) { return *this op fixed((unsigned long long)rhs); } \
+	fixed& operator op(unsigned int rhs) { return *this op fixed(rhs); }
+
+#define PROXY_CMP_HELPER(op, type) \
+	inline bool operator op(type lhs, const fixed& rhs) { return fixed(lhs).v op rhs.v; } \
+	inline bool operator op(const fixed& lhs, type rhs) { return lhs.v op fixed(rhs).v; }
+#define PROXY_CMP(op) \
+	inline bool operator op(const fixed& lhs, const fixed& rhs) { return lhs.v op rhs.v; } \
+	PROXY_CMP_HELPER(op, long double) \
+	PROXY_CMP_HELPER(op, double) \
+	PROXY_CMP_HELPER(op, float) \
+	PROXY_CMP_HELPER(op, long int) \
+	PROXY_CMP_HELPER(op, int)
+
+#define PROXY_OP_HELPER(op, type) \
+	inline fixed operator op(type lhs, const fixed& rhs) { return fixed(lhs) op rhs; } \
+	inline fixed operator op(const fixed& lhs, type rhs) { return lhs op fixed(rhs); }
+
+#define PROXY_OP(op) \
+	PROXY_OP_HELPER(op, long double) \
+	PROXY_OP_HELPER(op, double) \
+	PROXY_OP_HELPER(op, float) \
+	PROXY_OP_HELPER(op, long long) \
+	PROXY_OP_HELPER(op, long) \
+	PROXY_OP_HELPER(op, int) \
+	PROXY_OP_HELPER(op, unsigned long long) \
+	inline fixed operator op(unsigned long lhs, const fixed& rhs) { return fixed((unsigned long long)lhs) op rhs; } \
+	inline fixed operator op(const fixed& lhs, unsigned long rhs) { return lhs op fixed((unsigned long long)rhs); } \
+	PROXY_OP_HELPER(op, unsigned int)
+
+		struct fixed
+		{
+			enum { BITS = 8, DENOM = 1 << BITS };
+			long long v;
+
+			static long long conv(long long v)
+			{
+				auto neg = v < 0;
+				if (neg) v = -v;
+				v = v << BITS;
+				if (neg) v = -v;
+				return v;
+			}
+			static long long conv(int v)  { return conv((long long) v); }
+			static long long conv(unsigned long long v) { return (0x7FFFFFFFFFFFFFFFull & (v << BITS)); }
+			static long long conv(unsigned int v) { return v << BITS; }
+			static long long conv(long double v)
+			{
+				v *= DENOM;
+				v += 0.5;
+				return (long long) v;
+			}
+
+			static long long conv(double v)
+			{
+				v *= DENOM;
+				v += 0.5;
+				return (long long) v;
+			}
+
+			static long long conv(float v)
+			{
+				v *= DENOM;
+				v += 0.5;
+				return (long long) v;
+			}
+
+			fixed() : v(0) {}
+			fixed(fixed && rhs) : v(rhs.v){}
+			fixed(const fixed & rhs) : v(rhs.v){}
+			fixed(long long v) : v(conv(v)) {}
+			fixed(int v) : v(conv(v)) {}
+			fixed(unsigned long long v) : v(conv(v)) {}
+			fixed(unsigned int v) : v(conv(v)) {}
+
+			explicit fixed(long double v) : v(conv(v)) {}
+			explicit fixed(double v) : v(conv(v)) {}
+			explicit fixed(float v) : v(conv(v)) {}
+
+			static fixed fromValue(long long v)
+			{
+				fixed ret;
+				ret.v = v;
+				return ret;
+			}
+
+			fixed& operator = (fixed && rhs) { v = rhs.v; return *this; }
+			fixed& operator = (const fixed& rhs) { v = rhs.v; return *this; }
+			fixed& operator = (long long rhs) { v = conv(rhs); return *this; }
+			fixed& operator = (int rhs) { v = conv(rhs); return *this; }
+			fixed& operator = (unsigned long long rhs) { v = conv(rhs); return *this; }
+			fixed& operator = (unsigned int rhs) { v = conv(rhs); return *this; }
+#if 1
+			fixed& operator += (const fixed& rhs) { v += rhs.v; return *this; }
+			fixed& operator -= (const fixed& rhs) { v -= rhs.v; return *this; }
+			fixed& operator *= (const fixed& rhs) { v *= rhs.v; v /= DENOM; return *this; }
+			fixed& operator /= (const fixed& rhs) { v *= DENOM; v /= rhs.v; return *this; }
+#else
+			fixed& operator += (const fixed& rhs)
+			{
+				auto tmp = v;
+				v += rhs.v;
+
+				auto t1 = (float) tmp / DENOM;
+				auto v1 = (float) v / DENOM;
+				auto r1 = (float) rhs.v / DENOM;
+				if (t1 + r1 != v1)
+					std::cout << "!" << std::flush;
+				return *this;
+			}
+			fixed& operator -= (const fixed& rhs)
+			{
+				auto tmp = v;
+				v += rhs.v;
+
+				auto t1 = (float) tmp / DENOM;
+				auto v1 = (float) v / DENOM;
+				auto r1 = (float) rhs.v / DENOM;
+				if (t1 - r1 != v1)
+					std::cout << "!" << std::flush;
+				return *this;
+			}
+			fixed& operator *= (const fixed& rhs)
+			{
+				auto tmp = v;
+				v += rhs.v;
+
+				auto t1 = (float) tmp / DENOM;
+				auto v1 = (float) v / DENOM;
+				auto r1 = (float) rhs.v / DENOM;
+				if (t1 * r1 != v1)
+					std::cout << "!" << std::flush;
+				return *this;
+			}
+			fixed& operator /= (const fixed& rhs)
+			{
+				auto tmp = v;
+				v += rhs.v;
+
+				auto t1 = (float) tmp / DENOM;
+				auto v1 = (float) v / DENOM;
+				auto r1 = (float) rhs.v / DENOM;
+				if (t1 / r1 != v1)
+					std::cout << "!" << std::flush;
+				return *this;
+			}
+#endif
+
+			PROXY_OP_M(+= );
+			PROXY_OP_M(-= );
+			PROXY_OP_M(*= );
+			PROXY_OP_M(/= );
+
+			inline fixed operator -() const { return fromValue(-v); }
+			inline fixed operator +() const { return fromValue(+v); }
+			inline bool operator !() const { return v == 0; }
+
+			inline long long ipart() const { return v / DENOM; }
+		};
+
+		PROXY_CMP(== );
+		PROXY_CMP(!= );
+		PROXY_CMP(<);
+		PROXY_CMP(>);
+		PROXY_CMP(<= );
+		PROXY_CMP(>= );
+
+#if 1
+		inline fixed operator + (const fixed& lhs, const fixed& rhs) { return fixed::fromValue(lhs.v + rhs.v); }
+		inline fixed operator - (const fixed& lhs, const fixed& rhs) { return fixed::fromValue(lhs.v - rhs.v); }
+		inline fixed operator * (const fixed& lhs, const fixed& rhs) { return fixed::fromValue((lhs.v * rhs.v) / fixed::DENOM); }
+		inline fixed operator / (const fixed& lhs, const fixed& rhs) { return fixed::fromValue((lhs.v * fixed::DENOM) / rhs.v); }
+#else
+		inline fixed operator + (const fixed& lhs, const fixed& rhs)
+		{
+			auto ret = v;
+			v += rhs.v;
+
+			auto t1 = (float) tmp / DENOM;
+			auto v1 = (float) v / DENOM;
+			auto r1 = (float) rhs.v / DENOM;
+			if (t1 + r1 != v1)
+				std::cout << "!" << std::flush;
+			return ret;
+		}
+		inline fixed operator - (const fixed& lhs, const fixed& rhs) { return fixed(lhs.v - rhs.v); }
+		inline fixed operator * (const fixed& lhs, const fixed& rhs) { return fixed((lhs.v * rhs.v) / fixed::DENOM); }
+		inline fixed operator / (const fixed& lhs, const fixed& rhs) { return fixed((lhs.v * fixed::DENOM) / rhs.v); }
+#endif
+		PROXY_OP(+);
+		PROXY_OP(-);
+		PROXY_OP(*);
+		PROXY_OP(/ );
+
+		inline fixed __abs(const fixed& ld)
+		{
+			if (ld < 0) return -ld;
+			return ld;
+		}
+
+		template <class T> struct caster;
+#define FLOAT_CAST(T) template <> struct caster<T> { static T cast(const fixed& v) { return ((T)v.v) / fixed::DENOM; } }
+#define INT_CAST(T) template <> struct caster<T> { static T cast(const fixed& v) { return (T) v.ipart(); } }
+
+		FLOAT_CAST(long double);
+		FLOAT_CAST(double);
+		FLOAT_CAST(float);
+		INT_CAST(long long);
+		INT_CAST(long);
+		INT_CAST(int);
+		INT_CAST(char);
+		INT_CAST(unsigned long long);
+		INT_CAST(unsigned long);
+		INT_CAST(unsigned int);
+		INT_CAST(unsigned char);
+
+		template <typename T>
+		inline T cast(const fixed& v) { return caster<T>::cast(v); }
+
+		inline fixed sin(const fixed& v) { return fixed(std::sin(cast<double>(v))); }
+		inline fixed cos(const fixed& v) { return fixed(std::cos(cast<double>(v))); }
+		inline fixed sqrt(const fixed& v) { return fixed(std::sqrt(cast<double>(v))); }
+#endif
 
 		template <size_t width, size_t height>
 		class MatrixBase
