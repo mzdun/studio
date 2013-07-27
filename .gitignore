@@ -43,3 +43,4 @@ bin
 *.pot
 *.mo
 Thumbs.db
+*.png
