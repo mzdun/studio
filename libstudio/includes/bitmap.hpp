@@ -62,7 +62,7 @@ namespace studio
 
 		unsigned char* getDst(int x, int y)
 		{
-			return (unsigned char*) m_pixels + (m_height - y - 1) * stride() + x * (BPP >> 3);
+			return (unsigned char*) m_pixels + y * stride() + x * (BPP >> 3);
 		}
 
 		void blend(int x, int y, unsigned int color, const fixed& brightness)
@@ -189,13 +189,13 @@ namespace studio
 		inline math::Point tr(const math::Point& pt)
 		{
 			auto pThis = static_cast<T*>(this);
-			return { pt.x() + pThis->m_width / 2, -pt.y() + pThis->m_height / 2 };
+			return { pt.x() + pThis->m_width / 2, pt.y() + pThis->m_height / 2 };
 		}
 
 		inline math::Point revTr(const math::Point& pt)
 		{
 			auto pThis = static_cast<T*>(this);
-			return { pt.x() - pThis->m_width / 2, -(pt.y() - pThis->m_height / 2) };
+			return { pt.x() - pThis->m_width / 2, pt.y() - pThis->m_height / 2 };
 		}
 	private:
 		Render m_renderType;
