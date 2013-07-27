@@ -39,6 +39,8 @@
 #include <future>
 #include <iomanip>
 
+#include <sstream>
+
 #define DEPTH_BUFFER
 //#define STEREO_CAMERA
 #define CYAN_MAGENTA
@@ -226,6 +228,19 @@ std::shared_ptr<CanvasT> create_canvas(const std::shared_ptr<studio::Scene>& sce
 	return cam->create_canvas<CanvasT>(1400, 800);
 }
 
+std::shared_ptr<PlatformBitmap<BitmapType::G8>> calcShadow(Camera* camera, CanvasType* canvas, Light* light, int i)
+{
+	std::ostringstream o;
+	o << "shadow_" << i << ".png";
+
+	auto _pos = light->position();
+	camera->transform(_pos, math::Matrix::identity());
+	auto pos = camera->project(_pos);
+	auto shadow = canvas->calcShadow(pos, _pos.z());
+	shadow->save(o.str().c_str());
+	return shadow;
+}
+
 int test(int argc, char* argv [])
 {
 	PlatformAPI init;
@@ -233,16 +248,60 @@ int test(int argc, char* argv [])
 	auto scene = std::make_shared<Scene>();
 	setUp(scene);
 	lights(scene);
-	auto canvas = create_canvas<studio::CanvasType>(scene);
+	auto canvas = create_canvas<CanvasType>(scene);
 #ifdef DEPTH_BUFFER
 	canvas->setRenderType(Render::Solid);
 #endif
 
 	scene->renderAllCameras();
-	canvas->save("test.png");
 #if defined(DEPTH_BUFFER) && !defined(STEREO_CAMERA)
 	canvas->saveDepths("depths.png");
+
+	auto && lights = scene->lights();
+	auto i = 0;
+	auto cams = scene->cameras();
+	auto icam = cams.front();
+
+	// casting to this type, 'cos I don't want the program to crash but rather have
+	// it not compiled on the matching lambda to the async
+	auto camera = std::static_pointer_cast<CanvasTraits<CanvasType>::CameraType>(icam);
+
+	std::vector< std::future< std::shared_ptr<PlatformBitmap<BitmapType::G8>> > > tasks;
+
+	for (auto && light : lights)
+	{
+		tasks.push_back(std::async([=](Camera* camera, CanvasType* canvas, Light* light, int i) {
+			std::ostringstream o1, o2;
+
+			o1 << "<" << i;
+			std::cout << o1.str() << std::flush;
+
+			auto sh = calcShadow(camera, canvas, light, i);
+			o2 << i << ">";
+			std::cout << o2.str() << std::flush;
+			return sh;
+		}, camera.get(), canvas.get(), light.get(), ++i));
+	}
+
+	for (auto && task : tasks)
+	{
+		auto sh = task.get();
+		canvas->applyShadow(sh.get());
+	}
+
+	for (auto && light : lights)
+	{
+		[=](Camera* camera, CanvasType* canvas, Light* light){
+			auto p0 = light->position();
+			camera->transform(p0, math::Matrix::identity());
+			auto p1 = camera->project(p0);
+			p1 = canvas->tr(p1);
+			canvas->plot(cast<int>(p1.x()), cast<int>(p1.y()), Color(0xFF, 1, 1));
+		}(camera.get(), canvas.get(), light.get());
+	}
+
 #endif
+	canvas->save("test.png");
 
 #if 0
 	std::vector<std::future<void>> tasks;

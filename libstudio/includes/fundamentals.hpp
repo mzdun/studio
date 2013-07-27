@@ -731,6 +731,7 @@ namespace studio
 			Y = (u8) lum;
 		}
 		static Grayscale white() { return Grayscale{ 0xFF }; }
+		static Grayscale black() { return Grayscale{ 0x00 }; }
 	};
 
 	using math::fixed;

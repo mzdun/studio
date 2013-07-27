@@ -30,6 +30,7 @@
 #include "canvas.hpp"
 
 #include <limits>
+#include <tuple>
 
 namespace studio
 {
@@ -102,11 +103,11 @@ namespace studio
 		}
 		void blend(int x, int y, const fixed& depth, const fixed& brightness)
 		{
-			blend(x, y, Pixel::white(), brightness);
+			blend(x, y, Pixel::black(), brightness);
 		}
 		void plot(int x, int y)
 		{
-			plot(x, y, Pixel::white());
+			plot(x, y, Pixel::black());
 		}
 	};
 
@@ -175,15 +176,15 @@ namespace studio
 		Render getRenderType() const override { return m_renderType; }
 		void setRenderType(Render renderType) { m_renderType = renderType; }
 
-		inline math::Point tr(const math::Point& pt)
+		inline math::Point tr(const math::Point& pt) const
 		{
-			auto pThis = static_cast<T*>(this);
+			auto pThis = static_cast<const T*>(this);
 			return { pt.x() + pThis->m_width / 2, pt.y() + pThis->m_height / 2 };
 		}
 
-		inline math::Point revTr(const math::Point& pt)
+		inline math::Point revTr(const math::Point& pt) const
 		{
-			auto pThis = static_cast<T*>(this);
+			auto pThis = static_cast<const T*>(this);
 			return { pt.x() - pThis->m_width / 2, pt.y() - pThis->m_height / 2 };
 		}
 	private:
@@ -264,6 +265,154 @@ namespace studio
 			}
 			depths.save(path);
 		}
+
+		const fixed& getDepth(int x, int y) const { return m_depth[y * static_cast<const T*>(this)->m_width + x]; }
+
+		bool isInside(int x, int y) const
+		{
+			return
+				x >= 0 && x < static_cast<const T*>(this)->m_width &&
+				y >= 0 && y < static_cast<const T*>(this)->m_height;
+		}
+
+		struct DepthPlotter
+		{
+			template <typename S>
+			struct Slope
+			{
+				S v0;
+				S v1;
+				S dv;
+
+				Slope() {}
+				Slope(const S& p0, const S& p1)
+					: v0(p0)
+					, v1(p1)
+					, dv(p1 - p0)
+				{
+				}
+				S interpolate(int x, int dx)
+				{
+					return v0 + x * dv / dx;
+				}
+			};
+
+			const DepthMap& ref;
+			bool steep;
+			Slope<int> x;
+			Slope<int> y;
+			Slope<fixed> z;
+			DepthPlotter(const DepthMap& ref, int x, int y, fixed z, int X, int Y, fixed Z)
+				: ref(ref)
+				, x(x, X)
+				, y(y, Y)
+				, z(z, Z)
+			{
+				steep = std::abs(this->y.dv) > std::abs(this->x.dv);
+				if (steep)
+					std::swap(this->x, this->y);
+			}
+
+			const fixed& depth(int x, int y) const
+			{
+				if (steep) return ref.getDepth(y, x);
+				return ref.getDepth(x, y);
+			}
+
+			bool isInside(int x, int y) const
+			{
+				if (steep) return ref.isInside(y, x);
+				return ref.isInside(x, y);
+			}
+
+			std::pair<int, fixed> interpolate(int _x)
+			{
+				return std::make_pair(y.interpolate(_x, x.dv), z.interpolate(_x, x.dv));
+			}
+		};
+
+		bool isBlockedFrom(int x, int y, int X, int Y, fixed Z)
+		{
+			DepthPlotter dp{ *this, x, y, getDepth(x, y), X, Y, Z };
+
+			for (int _x = 0; _x < dp.x.dv; ++_x)
+			{
+				int x = dp.x.v0 + _x;
+				int y;
+				fixed z;
+				std::tie(y, z) = dp.interpolate(_x);
+				if (dp.isInside(x, y) && z < dp.depth(x, y))
+					return true;
+			}
+			return false;
+		}
+
+		std::shared_ptr<PlatformBitmap<BitmapType::G8>> calcShadow(const math::Point& light, const fixed& Z) const
+		{
+			auto pT = static_cast<const T*>(this);
+			auto black = Grayscale::black();
+			math::Point tr = pT->tr(light);
+			auto X = cast<int>(tr.x());
+			auto Y = cast<int>(tr.y());
+
+			auto shadow = std::make_shared<GrayscaleBitmap>(pT->m_width, pT->m_height);
+			shadow->erase();
+			auto depths = [&](const math::Point& test) -> bool {
+				auto pt = pT->tr(test);
+				DepthPlotter dp{ *this, cast<int>(pt.x()), cast<int>(pt.y()), getDepth(cast<int>(pt.x()), cast<int>(pt.y())), X, Y, Z };
+
+				Grayscale end = Grayscale::white();
+				for (int _x = 0; _x < dp.x.dv; ++_x)
+				{
+					int x = dp.x.v0 + _x;
+					int y;
+					fixed z;
+					std::tie(y, z) = dp.interpolate(_x);
+					if (dp.isInside(x, y))
+					{
+						auto z1 = dp.depth(x, y);
+						if (z > z1)
+							return false;
+					}
+					else
+						return true;
+				}
+				return true;
+			};
+
+			auto dx = pT->m_width / 2;
+			auto dy = pT->m_height / 2;
+			for (int y = 0; y < pT->m_height; y++)
+			{
+				for (int x = 0; x < pT->m_width; x++)
+				{
+					if (!depths({ x - dx, y - dy }))
+					{
+						shadow->plot(x, y, Grayscale::black());
+						//pT->blend(x, y, Color::black(), fixed(82)/1000);
+					}
+				}
+			}
+			return shadow;
+		}
+
+		void applyShadow(const PlatformBitmap<BitmapType::G8>* shadow)
+		{
+			auto sh = shadow->m_pixels;
+			auto pT = static_cast<T*>(this);
+			for (int y = 0; y < pT->m_height; y++)
+			{
+				auto src = sh + y * shadow->stride();
+				for (int x = 0; x < pT->m_width; x++)
+				{
+					auto c = *src++;
+					if (c == 0xFF)
+						continue;
+					c = 0xFF - c;
+					pT->blend(x, y, Color::black(), fixed(82) * c / (1000*0xFF));
+				}
+			}
+		}
 	};
 
 	struct GrayscaleDepthBitmap : public CanvasImpl<GrayscaleDepthBitmap>, public DepthMap<GrayscaleDepthBitmap>, public PlatformBitmap<BitmapType::G8>
@@ -314,6 +463,10 @@ namespace studio
 		{
 			if (isAbove(x, y, depth))
 				PlatformBitmap<BitmapType::RGB24>::blend(x, y, depth, brightness);
+		}
+		void blend(int x, int y, const Color& color, const fixed& brightness)
+		{
+			PlatformBitmap<BitmapType::RGB24>::blend(x, y, color, brightness);
 		}
 
 		void floodLine(int y, int start, int stop, const fixed& startDepth, const fixed& stopDepth, Shader* shader);

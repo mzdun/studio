@@ -88,6 +88,9 @@ namespace studio
 		{
 			Container::renderTo(cam, math::Matrix::identity(), m_lights);
 		}
+
+		const Lights& lights() const { return m_lights; }
+		const Cameras& cameras() const { return m_cameras; }
 	};
 }
 
