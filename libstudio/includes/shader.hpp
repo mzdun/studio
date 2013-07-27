@@ -34,18 +34,18 @@ namespace studio
 	struct Shader
 	{
 		virtual ~Shader() {}
-		virtual unsigned int shade(const math::Point& pt) = 0;
+		virtual Color shade(const math::Point& pt) = 0;
 	};
 
 	class UniformShader : public Shader
 	{
-		unsigned int m_color;
+		Color m_color;
 	public:
-		UniformShader(unsigned int color)
+		UniformShader(const Color& color)
 			: m_color(color)
 		{}
 
-		unsigned int shade(const math::Point& pt) override
+		Color shade(const math::Point& pt) override
 		{
 			return m_color;
 		}
@@ -123,7 +123,7 @@ namespace studio
 		math::Vertex counterProject(const math::Point& pt);
 	public:
 		LightsShader(const MaterialPtr& material, LightsInfo && info, const math::Point& p0, const math::Point& p1, const math::Point& p2, const math::Vertex& v0, const math::Vertex& v1, const math::Vertex& v2);
-		unsigned int shade(const math::Point& pt) override;
+		Color shade(const math::Point& pt) override;
 	};
 }
 

@@ -31,6 +31,16 @@
 
 namespace studio
 {
+	typedef signed char i8;
+	typedef signed short i16;
+	typedef signed int i32;
+	typedef signed long long i64;
+
+	typedef unsigned char u8;
+	typedef unsigned short u16;
+	typedef unsigned int u32;
+	typedef unsigned long long u64;
+
 	namespace math
 	{
 		static const long double PI = 3.14159265358979323846264338327950288419716939937510L;
@@ -642,6 +652,86 @@ namespace studio
 		}
 
 	}
+
+	struct Color
+	{
+		u8 R;
+		u8 G;
+		u8 B;
+		enum { channels = 3 };
+		u8 channel(int ch) const
+		{
+			switch (ch)
+			{
+			case 0: return B;
+			case 1: return G;
+			default:
+				break;
+			}
+			return R;
+		}
+
+		u8& channel(int ch)
+		{
+			switch (ch)
+			{
+			case 0: return B;
+			case 1: return G;
+			default:
+				break;
+			}
+			return R;
+		}
+
+		Color() : R(0), G(0), B(0) {}
+		Color(u8 R, u8 G, u8 B) : R(R), G(G), B(B) {}
+		explicit Color(u32 color)
+			: R((color >> 16) & 0xFF)
+			, G((color >> 8) & 0xFF)
+			, B((color) & 0xFF)
+		{
+		}
+		Color(const Color& rhs) : R(rhs.R), G(rhs.G), B(rhs.B) {}
+		Color& operator = (const Color& rhs)
+		{
+			R = rhs.R;
+			G = rhs.G;
+			B = rhs.B;
+			return *this;
+		}
+		static Color fromCStr(const char* str);
+		static Color white() { return { 0xFF, 0xFF, 0xFF }; }
+		static Color black() { return { 0x00, 0x00, 0x00 }; }
+	};
+
+	struct Grayscale
+	{
+		u8 Y;
+		enum { channels = 1 };
+		u8 channel(int) const { return Y; }
+		explicit Grayscale(u8 Y = 0) : Y(Y) {}
+		Grayscale(const Grayscale& rhs) : Y(rhs.Y) {}
+		Grayscale& operator = (const Grayscale& rhs)
+		{
+			Y = rhs.Y;
+			return *this;
+		}
+		explicit Grayscale(const Color& color)
+		{
+			if (color.R == color.G && color.R == color.B)
+			{
+				Y = color.R;
+				return;
+			}
+
+			u64 lum = (u64) color.R * 299;
+			lum += (u64) color.G * 587;
+			lum += (u64) color.B * 114;
+			lum /= 1000;
+			Y = (u8) lum;
+		}
+		static Grayscale white() { return Grayscale{ 0xFF }; }
+	};
 
 	using math::fixed;
 	using math::cast;

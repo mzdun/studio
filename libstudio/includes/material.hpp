@@ -33,20 +33,23 @@ namespace studio
 	struct Material
 	{
 		virtual ~Material() {}
-		virtual unsigned int color(/* position on the surface... */) const = 0;
+		virtual Color color(/* position on the surface... */) const = 0;
 	};
 
 	typedef std::shared_ptr<Material> MaterialPtr;
 
 	class SimpleMaterial : public Material
 	{
-		unsigned int m_color;
+		Color m_color;
 	public:
-		SimpleMaterial(unsigned int color)
+		SimpleMaterial(const Color& color)
 			: m_color(color)
 		{}
+		SimpleMaterial(u8 r, u8 g, u8 b)
+			: m_color(r, g, b)
+		{}
 
-		unsigned int color(/* position on the surface... */) const override { return m_color; }
+		Color color(/* position on the surface... */) const override { return m_color; }
 	};
 }
 

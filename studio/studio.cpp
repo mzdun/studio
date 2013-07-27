@@ -181,17 +181,22 @@ void setUp(std::shared_ptr<Scene>& scene)
 	scene->add<Block>(577, 352, 48)->translate(700, 545, -96);
 
 	auto wall = ((studio::Block*)scene->begin()->get());
-	auto wall_color = std::make_shared<studio::SimpleMaterial>(0xfffde6);
+	auto wall_color = std::make_shared<studio::SimpleMaterial>(0xff, 0xfd, 0xe6);
 	for (int i = 0; i < 6; ++i)
 		wall->setMaterialForSide(i, wall_color);
 
+	auto floor = ((studio::Block*)(scene->begin() + 1)->get()); //d5a862
+	auto floor_color = std::make_shared<studio::SimpleMaterial>(0xd5, 0xa8, 0x62);
+	for (int i = 0; i < 6; ++i)
+		floor->setMaterialForSide(i, floor_color);
+
 	auto tv = ((studio::Block*)(scene->end() - 1)->get());
-	auto tv_color = std::make_shared<studio::SimpleMaterial>(0x111111);
+	auto tv_color = std::make_shared<studio::SimpleMaterial>(0x11, 0x11, 0x11);
 	for (int i = 0; i < 6; ++i)
 		tv->setMaterialForSide(i, tv_color);
 
-	auto side_color = std::make_shared<studio::SimpleMaterial>(0xffffa0);
-	auto front_color = std::make_shared<studio::SimpleMaterial>(0x051326);
+	auto side_color = std::make_shared<studio::SimpleMaterial>(0xff, 0xff, 0xa0);
+	auto front_color = std::make_shared<studio::SimpleMaterial>(0x26, 0x13, 0x05);
 
 	for (auto && solid : make_range(scene->begin() + 3, scene->end() - 1))
 	{
@@ -206,8 +211,9 @@ void lights(const std::shared_ptr<studio::Scene>& scene)
 {
 	math::Vertex lightPos { fixed(1007.5), 1030, -1000 }; //same as camera's
 
-	scene->add<studio::SimpleLight>(lightPos + math::Vertex(800, 0, 0), 200);
-	scene->add<studio::SimpleLight>(lightPos + math::Vertex(-800, 0, 0), 200);
+	scene->add<studio::SimpleLight>(lightPos + math::Vertex(100, 0, 0), 100);
+	scene->add<studio::SimpleLight>(lightPos + math::Vertex(-100, 0, 0), 100);
+	scene->add<studio::SimpleLight>(math::Vertex{100, 100, -500}, 100);
 }
 
 template <typename CanvasT>

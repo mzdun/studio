@@ -66,7 +66,7 @@ namespace studio
 		for (int x = 0; x < dx; x++)
 		{
 			if (isAbove(start + x, y, startDepth + dz * fixed(x) / fixed(dx)))
-				plot(start + x, y, shader->shade(revTr({ fixed(start + x), fixed(y) })));
+				plot(start + x, y, Grayscale(shader->shade(revTr({ fixed(start + x), fixed(y) }))));
 		}
 	}
 

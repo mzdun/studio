@@ -33,15 +33,24 @@
 
 namespace studio
 {
+	template <size_t BPP>
+	struct PixelSelect;
+
+	template <>
+	struct PixelSelect<8> { typedef Grayscale type; };
+	template <>
+	struct PixelSelect<24> { typedef Color type; };
 
 	template <size_t BPP>
 	struct RawBitmap
 	{
-		unsigned char* m_pixels;
+		typedef typename PixelSelect<BPP>::type Pixel;
+
+		u8* m_pixels;
 		int m_width;
 		int m_height;
 
-		RawBitmap(unsigned char* pixels, int w, int h)
+		RawBitmap(u8* pixels, int w, int h)
 			: m_pixels(pixels)
 			, m_width(w)
 			, m_height(h)
@@ -51,73 +60,53 @@ namespace studio
 
 		int bytesPerLine() const { return m_width * (BPP >> 3); }
 		int stride() const { return ((bytesPerLine() + 3) >> 2) << 2; }
-		void erase() { memset(m_pixels, 0, stride() * m_height); }
-		static inline unsigned char blendChannel(unsigned char over, unsigned char under, const fixed& brightness)
+		void erase() { memset(m_pixels, 0xFF, stride() * m_height); }
+		static inline u8 blendChannel(u8 over, u8 under, const fixed& brightness)
 		{
 			int value = cast<int>(brightness * over + (1 - brightness) * under);
 			if (value < 0) value = 0;
 			if (value > 0xFF) value = 0xFF;
-			return (unsigned char) value;
+			return (u8) value;
 		}
 
-		unsigned char* getDst(int x, int y)
+		u8* getDst(int x, int y)
 		{
-			return (unsigned char*) m_pixels + y * stride() + x * (BPP >> 3);
+			return m_pixels + y * stride() + x * (BPP >> 3);
 		}
 
-		void blend(int x, int y, unsigned int color, const fixed& brightness)
+		void blend(int x, int y, const Pixel& color, const fixed& brightness)
 		{
 			if (x < 0 || x >= m_width ||
 				y < 0 || y >= m_height)
 			{
 				return;
 			}
-			unsigned char* dst = getDst(x, y);
-			unsigned char* src = (unsigned char*) &color;
+			u8* dst = getDst(x, y);
 			for (size_t i = 0; i < (BPP >> 3); i++)
 			{
-				*dst = blendChannel(*src++, *dst, brightness); ++dst;
+				*dst = blendChannel(color.channel(i), *dst, brightness); ++dst;
 			}
 		}
-		void plot(int x, int y, unsigned int color)
+		void plot(int x, int y, const Pixel& color)
 		{
 			if (x < 0 || x >= m_width ||
 				y < 0 || y >= m_height)
 			{
 				return;
 			}
-			unsigned char* dst = getDst(x, y);
-			unsigned char* src = (unsigned char*) &color;
+			u8* dst = getDst(x, y);
 			for (size_t i = 0; i < (BPP >> 3); i++)
 			{
-				*dst++ = *src++;
+				*dst++ = color.channel(i);
 			}
 		}
 		void blend(int x, int y, const fixed& depth, const fixed& brightness)
 		{
-			if (x < 0 || x >= m_width ||
-				y < 0 || y >= m_height)
-			{
-				return;
-			}
-			unsigned char* dst = getDst(x, y);
-			for (size_t i = 0; i < (BPP >> 3); i++)
-			{
-				*dst = blendChannel(0xFF, *dst, brightness); ++dst;
-			}
+			blend(x, y, Pixel::white(), brightness);
 		}
 		void plot(int x, int y)
 		{
-			if (x < 0 || x >= m_width ||
-				y < 0 || y >= m_height)
-			{
-				return;
-			}
-			unsigned char* dst = getDst(x, y);
-			for (size_t i = 0; i < (BPP >> 3); i++)
-			{
-				*dst++ = 0xFF;
-			}
+			plot(x, y, Pixel::white());
 		}
 	};
 
@@ -270,7 +259,7 @@ namespace studio
 					if (z > m_maxSet || z < m_minSet)
 						continue;
 
-					depths.plot(x, y, cast<unsigned char>(0x40 + (m_maxSet - z)*(255 - 0x40) / dz));
+					depths.plot(x, y, Grayscale { cast<u8>(0x40 + (m_maxSet - z)*(255 - 0x40) / dz) });
 				}
 			}
 			depths.save(path);
@@ -295,7 +284,7 @@ namespace studio
 		void floodFill(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3, Shader* shader);
 		void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) override
 		{
-			UniformShader black(0x000000);
+			UniformShader black(Color::black());
 			floodFill(p1, p2, p3, &black);
 		}
 		void fill(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3, Shader* shader) override
@@ -331,7 +320,7 @@ namespace studio
 		void floodFill(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3, Shader* shader);
 		void flood(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3) override
 		{
-			UniformShader black(0x000000);
+			UniformShader black(Color::black());
 			floodFill(p1, p2, p3, &black);
 		}
 		void fill(const PointWithDepth& p1, const PointWithDepth& p2, const PointWithDepth& p3, Shader* shader) override

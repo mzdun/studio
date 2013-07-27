@@ -86,7 +86,7 @@ namespace studio
 				intensity /= 2;
 				intensity /= m_lights.size();
 			}
-			return intensity > 1 ? 1 : intensity;
+			return intensity;
 		}
 	};
 }

@@ -64,19 +64,22 @@ namespace studio
 		return {p.x3, p.y3, p.z3};
 	}
 
-	unsigned int LightsShader::shade(const math::Point& pt)
+	inline void modify(Color& c, int ch, const fixed& intensity)
+	{
+		auto tmp = c.channel(ch) * intensity;
+		if (tmp > 0xFF) tmp = 0xFF;
+		c.channel(ch) = cast<u8>(tmp);
+	}
+
+	Color LightsShader::shade(const math::Point& pt)
 	{
 		auto intensity = m_info.getIntensity(counterProject(pt));
 
-		// BW only...
-		unsigned int color = m_material ? m_material->color() : 0xFFFFFF;
-		unsigned short B = cast<unsigned short>((unsigned char) (color & 0xFF) * intensity);
-		unsigned short G = cast<unsigned short>((unsigned char) ((color >> 8) & 0xFF) * intensity);
-		unsigned short R = cast<unsigned short>((unsigned char) ((color >> 16) & 0xFF) * intensity);
-		if (B > 0xFF) B = 0xFF;
-		if (G > 0xFF) G = 0xFF;
-		if (R > 0xFF) R = 0xFF;
-		color = (R << 16) | (G << 8) | R;
+		Color color = m_material ? m_material->color() : Color::white();
+
+		for (int i = 0; i < Color::channels; ++i)
+			modify(color, i, intensity);
+
 		return color;
 	}
 }
